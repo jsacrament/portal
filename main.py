@@ -1,13 +1,14 @@
 import streamlit as st
-from auth import check_auth
 from utils import render_page
 
 st.set_page_config(page_title="Portal Corporativo", layout="wide")
 
-# Autenticação
-user_data = check_auth()
-if not user_data:
-    st.stop()
+# 🔓 Simula login automático (sem autenticação)
+user_data = {
+    "username": "admin",
+    "name": "Admin (Acesso Livre)",
+    "perfil": "admin"
+}
 
 # Menu lateral baseado no perfil
 menu_opcoes = ["Dashboard"]
