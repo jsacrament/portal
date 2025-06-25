@@ -3,7 +3,7 @@ from utils import render_page
 
 st.set_page_config(page_title="Portal Corporativo", layout="wide")
 
-# 🔓 Simula login automático (sem autenticação)
+# 🔓 Acesso direto sem autenticação
 user_data = {
     "username": "admin",
     "name": "Admin (Acesso Livre)",
@@ -17,5 +17,5 @@ if user_data["perfil"] == "admin":
 
 pagina = st.sidebar.selectbox("Menu", menu_opcoes)
 
-# Renderização da página selecionada
+# Renderiza a página selecionada
 render_page(pagina, user_data)
