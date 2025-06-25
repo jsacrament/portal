@@ -1,0 +1,15 @@
+credentials:
+  usernames:
+    admin:
+      name: Admin
+      password: '$2b$12$ZVNl8WRgYcDxPL9PAj7kV.fjz3XZdAo4ohE3zWmA7yd.PnU/rbsyS'  # senha: admin123
+      perfil: admin
+    user:
+      name: Usuário
+      password: '$2b$12$gY5PPt0edhAMwVK6WDPX3eZiqeYEqklsK7L7J.E7gbay4XfKkzVg2'  # senha: user123
+      perfil: comum
+
+cookie:
+  name: "meu_cookie"
+  key: "chave_supersecreta"
+  expiry_days: 1
