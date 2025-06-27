@@ -31,8 +31,8 @@ def enviar_email_via_emailjs(destinatario, nome, email, df, total_pontos):
     return response.status_code, response.text
 
 # Quiz e lógica igual ao anterior
-st.set_page_config(page_title="Quiz Star Wars: Engenharia de Dados", page_icon="🪐")
-st.title("🌟 Quiz Star Wars — Suporte e Engenharia de Dados")
+st.set_page_config(page_title="Desafio Star Wars: Engenharia de Dados", page_icon="🪐")
+st.title("🌟 Desafio Star Wars — Suporte e Engenharia de Dados")
 
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else st.text_input("Insira sua OpenAI API Key", type="password")
 ASSISTANT_ID = st.secrets["ASSISTANT_ID"] if "ASSISTANT_ID" in st.secrets else st.text_input("Insira seu Assistant ID", type="password")
