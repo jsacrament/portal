@@ -89,32 +89,39 @@ if st.session_state.etapa == "formulario":
         nome = st.text_input("Seu nome completo:")
         email = st.text_input("Seu e-mail:")
         destinatario = st.text_input("E-mail para envio do resultado:")
-        nivel = st.selectbox("Nível do OKR:", ["Empresa", "Departamento", "Equipe", "Individual"])
-        objetivo = st.text_area("Objetivo:")
+        gerar_cascata = st.radio("Deseja criar OKRs para todos os níveis da cascata?", ["Sim", "Não"])
 
-        st.markdown("### Key Results (até 5)")
-        kr1 = st.text_input("KR 1:")
-        kr2 = st.text_input("KR 2:")
-        kr3 = st.text_input("KR 3:")
-        kr4 = st.text_input("KR 4:")
-        kr5 = st.text_input("KR 5:")
+        registros = []
 
-        kr_inputs = [kr for kr in [kr1, kr2, kr3, kr4, kr5] if kr.strip()]
+        niveis = ["Empresa", "Departamento", "Equipe", "Individual"] if gerar_cascata == "Sim" else [st.selectbox("Nível do OKR:", ["Empresa", "Departamento", "Equipe", "Individual"])]
+
+        for nivel in niveis:
+            st.markdown(f"### Nível: {nivel}")
+            objetivo = st.text_area(f"Objetivo ({nivel}):", key=f"obj_{nivel}")
+
+            st.markdown("#### Key Results (até 5)")
+            kr1 = st.text_input(f"KR 1 ({nivel}):", key=f"kr1_{nivel}")
+            kr2 = st.text_input(f"KR 2 ({nivel}):", key=f"kr2_{nivel}")
+            kr3 = st.text_input(f"KR 3 ({nivel}):", key=f"kr3_{nivel}")
+            kr4 = st.text_input(f"KR 4 ({nivel}):", key=f"kr4_{nivel}")
+            kr5 = st.text_input(f"KR 5 ({nivel}):", key=f"kr5_{nivel}")
+
+            kr_inputs = [kr for kr in [kr1, kr2, kr3, kr4, kr5] if kr.strip()]
+            data_inicio = str(datetime.date.today())
+            data_fim = str(datetime.date.today() + datetime.timedelta(days=90))
+            for kr in kr_inputs:
+                registros.append({
+                    "Nível": nivel,
+                    "Objetivo": objetivo,
+                    "KR": kr,
+                    "Progresso (%)": 0,
+                    "Início": data_inicio,
+                    "Limite": data_fim
+                })
+
         enviar = st.form_submit_button("Avançar para Progresso")
 
-    if enviar and nome and email and objetivo and kr_inputs:
-        data_inicio = str(datetime.date.today())
-        data_fim = str(datetime.date.today() + datetime.timedelta(days=90))
-        registros = []
-        for kr in kr_inputs:
-            registros.append({
-                "Nível": nivel,
-                "Objetivo": objetivo,
-                "KR": kr,
-                "Progresso (%)": 0,
-                "Início": data_inicio,
-                "Limite": data_fim
-            })
+    if enviar and nome and email and registros:
         st.session_state.okr_df = pd.DataFrame(registros)
         st.session_state.nome = nome
         st.session_state.email = email
@@ -169,4 +176,5 @@ elif st.session_state.etapa == "analise":
         st.error(f"❌ Falha ao enviar e-mail: {status.text}")
 
     st.button("🔁 Reiniciar", on_click=lambda: st.session_state.clear())
+
 
