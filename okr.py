@@ -83,6 +83,10 @@ def enviar_email_via_emailjs(destinatario, nome, email, df):
     response = requests.post(url, json=payload)
     return response.status_code, response.text
 
+# --- Inicializa session_state ---
+if "novos_df" not in st.session_state:
+    st.session_state.novos_df = pd.DataFrame()
+
 # --- Interface ---
 st.title("🌟 Simulador de OKR com IA para Dados e BI")
 st.markdown("Crie, acompanhe e analise OKRs com apoio de Inteligência Artificial.")
@@ -114,6 +118,8 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
             })
 
     novos_df = pd.DataFrame(novos_okrs)
+    st.session_state.novos_df = novos_df
+
     st.subheader("Resultados-Chave")
     st.dataframe(novos_df)
 
@@ -125,27 +131,28 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
 
 # --- Atualização de progresso simples ---
 st.subheader("📊 Simulação de Progresso")
-if 'novos_df' in locals():
+if not st.session_state.novos_df.empty:
     with st.form("Atualizar KR"):
-        index_map = novos_df.index.tolist()
+        index_map = st.session_state.novos_df.index.tolist()
         if index_map:
             index = st.selectbox("Selecione o KR:", index_map)
-            novo_progresso = st.slider("Novo progresso (%)", 0, 100, int(novos_df.loc[index, "Progresso (%)"]))
+            novo_progresso = st.slider("Novo progresso (%)", 0, 100, int(st.session_state.novos_df.loc[index, "Progresso (%)"]))
             if st.form_submit_button("Atualizar"):
-                novos_df.at[index, "Progresso (%)"] = novo_progresso
+                st.session_state.novos_df.at[index, "Progresso (%)"] = novo_progresso
                 st.success("Progresso atualizado!")
-                recomendacao = gerar_recomendacao(novos_df.loc[index, "KR"], novo_progresso)
+                recomendacao = gerar_recomendacao(st.session_state.novos_df.loc[index, "KR"], novo_progresso)
                 st.info("Recomendação da IA:")
                 st.write(recomendacao)
         else:
             st.warning("Nenhum KR disponível.")
 
     st.subheader("Progresso Atualizado")
-    st.dataframe(novos_df)
-    st.bar_chart(novos_df.set_index("KR")["Progresso (%)"])
+    st.dataframe(st.session_state.novos_df)
+    st.bar_chart(st.session_state.novos_df.set_index("KR")["Progresso (%)"])
 
 # --- Exportar dados ---
-st.download_button("📄 Exportar OKRs", novos_df.to_csv(index=False), file_name="okr_exportados.csv")
+if not st.session_state.novos_df.empty:
+    st.download_button("📄 Exportar OKRs", st.session_state.novos_df.to_csv(index=False), file_name="okr_exportados.csv")
 
 
 
