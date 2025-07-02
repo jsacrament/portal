@@ -26,7 +26,6 @@ def gerar_okr(desafio):
     - [KR2]
     - [KR3]
     """
-
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -43,7 +42,6 @@ def gerar_recomendacao(kr, progresso):
 
     KR: {kr}
     """
-
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -106,7 +104,7 @@ st.markdown("Crie, acompanhe e compartilhe OKRs com apoio de Inteligência Artif
 # Carrega dados salvos
 df = carregar_dados()
 
-# Input do usuário
+# Inputs do usuário
 area = st.selectbox("Área responsável:", ["Dados", "BI", "DataOps", "Governança", "Outro"])
 desafio = st.text_area("Descreva seu desafio na área selecionada:")
 nome = st.text_input("Seu nome completo:")
@@ -118,12 +116,17 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
     st.success("OKR Gerado:")
     st.code(resultado, language='markdown')
 
+    # Extração dinâmica
     linhas = resultado.splitlines()
-    objetivo = linhas[1].replace("- ", "") if len(linhas) > 1 else ""
+    objetivo = ""
     novos_okrs = []
+    captura_krs = False
+
     for linha in linhas:
-        if linha.startswith("- ") and linha != linhas[1]:
-            kr = linha.replace("- ", "")
+        if linha.strip().lower().startswith("objetivo") and "- " in linha:
+            objetivo = linha.split("- ", 1)[1].strip()
+        elif linha.strip().startswith("- ") and captura_krs:
+            kr = linha.replace("- ", "").strip()
             novos_okrs.append({
                 "Área": area,
                 "Objetivo": objetivo,
@@ -132,10 +135,13 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
                 "Data de Início": str(datetime.date.today()),
                 "Data Limite": str(datetime.date.today() + datetime.timedelta(days=90))
             })
+        elif linha.lower().strip().startswith("resultados-chave") or linha.lower().strip().startswith("resultados chave"):
+            captura_krs = True
 
     novos_df = pd.DataFrame(novos_okrs)
     df = pd.concat([df, novos_df], ignore_index=True)
     salvar_dados(df)
+
     status, resposta = enviar_email_via_emailjs(destinatario, nome, email, novos_df)
     if status == 200:
         st.success("E-mail com os OKRs enviado com sucesso!")
@@ -144,10 +150,8 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
 
 # Mostrar OKRs
 st.subheader("📊 Acompanhamento dos Resultados-Chave")
-
 area_filtro = st.selectbox("Filtrar por área:", sorted(df["Área"].unique()) if not df.empty else ["-"])
 okr_filtrados = df[df["Área"] == area_filtro]
-
 st.dataframe(okr_filtrados)
 
 # Atualização de progresso
@@ -169,7 +173,8 @@ with st.form("Atualizar KR"):
         st.warning("Nenhum KR disponível para essa área.")
         st.form_submit_button("Atualizar", disabled=True)
 
-# Gráfico de progresso
+# Gráfico
 st.subheader("📈 Evolução Visual")
 if not okr_filtrados.empty:
     st.bar_chart(okr_filtrados.set_index("KR")["Progresso (%)"])
+
