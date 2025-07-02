@@ -12,7 +12,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # --- Caminho do arquivo de persistência ---
 DATA_PATH = "okr_data.json"
 
-# --- Função do Agente OpenAI ---
+# --- Função do Agente OpenAI com tratamento de erro ---
 def gerar_okr(desafio):
     prompt = f"""
     Crie um OKR para a área de Business Intelligence com base no seguinte desafio:
@@ -26,30 +26,38 @@ def gerar_okr(desafio):
     - [KR2]
     - [KR3]
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Você é um especialista em OKRs para equipes de dados."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    return response["choices"][0]["message"]["content"]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Você é um especialista em OKRs para equipes de dados."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response["choices"][0]["message"]["content"]
+    except Exception as e:
+        st.error(f"Erro ao gerar OKR com a IA: {e}")
+        return ""
 
-# --- Recomendações com base no progresso ---
+# --- Recomendações com tratamento de erro ---
 def gerar_recomendacao(kr, progresso):
     prompt = f"""
     O Resultado-Chave abaixo está com progresso em {progresso}%. Sugira melhorias, ações corretivas ou apoio:
 
     KR: {kr}
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Você é um analista de desempenho de OKR para dados e BI."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    return response["choices"][0]["message"]["content"]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Você é um analista de desempenho de OKR para dados e BI."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response["choices"][0]["message"]["content"]
+    except Exception as e:
+        st.error(f"Erro ao gerar recomendação: {e}")
+        return "Erro ao gerar recomendação."
 
 # --- Função para envio de e-mail via EmailJS ---
 def enviar_email_via_emailjs(destinatario, nome, email, df):
@@ -62,14 +70,18 @@ def enviar_email_via_emailjs(destinatario, nome, email, df):
     corpo += df.to_string(index=False)
 
     prompt = f"Gere uma análise executiva dos seguintes OKRs:\n\n{df.to_string(index=False)}"
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Você é um consultor sênior em gestão de desempenho e estratégias com OKR."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    analise = response["choices"][0]["message"]["content"]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Você é um consultor sênior em gestão de desempenho e estratégias com OKR."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        analise = response["choices"][0]["message"]["content"]
+    except Exception as e:
+        analise = f"Erro ao gerar análise da IA: {e}"
+
     corpo += f"\n\nAnálise da IA:\n{analise}"
 
     payload = {
@@ -113,6 +125,10 @@ destinatario = st.text_input("E-mail para envio do OKR:")
 
 if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario:
     resultado = gerar_okr(desafio)
+    if not resultado.strip():
+        st.warning("A geração do OKR falhou ou retornou vazio.")
+        st.stop()
+
     st.success("OKR Gerado:")
     st.code(resultado, language='markdown')
 
@@ -177,4 +193,5 @@ with st.form("Atualizar KR"):
 st.subheader("📈 Evolução Visual")
 if not okr_filtrados.empty:
     st.bar_chart(okr_filtrados.set_index("KR")["Progresso (%)"])
+
 
