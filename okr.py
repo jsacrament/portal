@@ -8,9 +8,7 @@ st.set_page_config(page_title="Simulador de OKRs com IA", page_icon="🎯")
 st.title("🎯 Simulador de OKRs com IA para Dados e BI")
 
 # --- API KEY ---
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else st.text_input("Insira sua OpenAI API Key", type="password")
-##ASSISTANT_ID = st.secrets["ASSISTANT_ID"] if "ASSISTANT_ID" in st.secrets else st.text_input("Insira seu Assistant ID", type="password")
-
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # --- EmailJS ---
 EMAILJS_SERVICE_ID = "masterclass"
