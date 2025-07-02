@@ -99,9 +99,9 @@ def salvar_dados(df):
     with open(DATA_PATH, "w") as f:
         json.dump(df.to_dict(orient="records"), f)
 
-# --- Layout ---
+# --- Layout da Aplicação ---
 st.title("🎯 Simulador de OKR para Dados e BI")
-st.markdown("Crie e acompanhe OKRs com o apoio de Inteligência Artificial.")
+st.markdown("Crie, acompanhe e compartilhe OKRs com apoio de Inteligência Artificial.")
 
 # Carrega dados salvos
 df = carregar_dados()
@@ -151,12 +151,14 @@ okr_filtrados = df[df["Área"] == area_filtro]
 st.dataframe(okr_filtrados)
 
 # Atualização de progresso
+st.subheader("✏️ Atualizar Progresso de KRs")
 with st.form("Atualizar KR"):
     index_map = okr_filtrados.index.tolist()
     if index_map:
         index = st.selectbox("Selecione o KR para atualizar:", index_map)
         novo_progresso = st.slider("Novo progresso (%)", 0, 100, int(df.loc[index, "Progresso (%)"]))
-        if st.form_submit_button("Atualizar"):
+        submit = st.form_submit_button("Atualizar")
+        if submit:
             df.at[index, "Progresso (%)"] = novo_progresso
             salvar_dados(df)
             st.success("Progresso atualizado com sucesso!")
@@ -165,6 +167,7 @@ with st.form("Atualizar KR"):
             st.write(recomendacao)
     else:
         st.warning("Nenhum KR disponível para essa área.")
+        st.form_submit_button("Atualizar", disabled=True)
 
 # Gráfico de progresso
 st.subheader("📈 Evolução Visual")
