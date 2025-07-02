@@ -34,8 +34,8 @@ def gerar_recomendacao(kr, progresso):
     )
     return response.choices[0].message.content
 
-def avaliar_kr_com_base_no_objetivo(objetivo, kr):
-    prompt = f"Avalie se o seguinte Resultado-Chave (KR) está bem alinhado ao Objetivo apresentado. Dê uma resposta crítica, indique pontos de melhoria e diga se o KR está claro, mensurável e relevante.\n\nObjetivo: {objetivo}\nKR: {kr}"
+def avaliar_kr_com_base_no_objetivo(objetivo, kr, nivel):
+    prompt = f"Avalie se o seguinte Resultado-Chave (KR) está bem alinhado ao Objetivo apresentado, considerando o nível de OKR: {nivel}.\n\nObjetivo: {objetivo}\nKR: {kr}"
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -45,8 +45,8 @@ def avaliar_kr_com_base_no_objetivo(objetivo, kr):
     )
     return response.choices[0].message.content
 
-def sugerir_cronograma_padrao(kr):
-    prompt = f"Sugira um cronograma padrão com dias úteis para realizar o seguinte Resultado-Chave (KR): '{kr}'. Indique datas de início e término, com base em uma janela padrão de 90 dias."
+def sugerir_cronograma_padrao(kr, nivel):
+    prompt = f"Sugira um cronograma padrão com dias úteis para o seguinte Resultado-Chave (KR), levando em conta que é um KR de nível '{nivel}':\n\nKR: {kr}"
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -89,6 +89,7 @@ if st.session_state.etapa == "formulario":
         nome = st.text_input("Seu nome completo:")
         email = st.text_input("Seu e-mail:")
         destinatario = st.text_input("E-mail para envio do resultado:")
+        nivel = st.selectbox("Nível do OKR:", ["Empresa", "Departamento", "Equipe", "Individual"])
         objetivo = st.text_area("Objetivo:")
 
         st.markdown("### Key Results (até 5)")
@@ -107,6 +108,7 @@ if st.session_state.etapa == "formulario":
         registros = []
         for kr in kr_inputs:
             registros.append({
+                "Nível": nivel,
                 "Objetivo": objetivo,
                 "KR": kr,
                 "Progresso (%)": 0,
@@ -145,12 +147,13 @@ elif st.session_state.etapa == "analise":
     df = st.session_state.okr_df
     for i, row in df.iterrows():
         recomendacao = gerar_recomendacao(row["KR"], row["Progresso (%)"])
-        avaliacao_kr = avaliar_kr_com_base_no_objetivo(row["Objetivo"], row["KR"])
-        cronograma = sugerir_cronograma_padrao(row["KR"])
+        avaliacao_kr = avaliar_kr_com_base_no_objetivo(row["Objetivo"], row["KR"], row["Nível"])
+        cronograma = sugerir_cronograma_padrao(row["KR"], row["Nível"])
+        st.markdown(f"**Nível:** {row['Nível']}")
         st.markdown(f"**KR:** {row['KR']}")
         st.markdown(f"**Progresso:** {row['Progresso (%)']}%")
         st.info(f"💡 Recomendação da IA: {recomendacao}")
-        st.warning(f"🧠 Avaliação do KR em relação ao Objetivo: {avaliacao_kr}")
+        st.warning(f"🧠 Avaliação do KR em relação ao Objetivo ({row['Nível']}): {avaliacao_kr}")
         st.success(f"📅 Cronograma Sugerido: {cronograma}")
         st.divider()
 
@@ -166,3 +169,4 @@ elif st.session_state.etapa == "analise":
         st.error(f"❌ Falha ao enviar e-mail: {status.text}")
 
     st.button("🔁 Reiniciar", on_click=lambda: st.session_state.clear())
+
