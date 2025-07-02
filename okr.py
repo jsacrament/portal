@@ -4,10 +4,24 @@ import pandas as pd
 import datetime
 import requests
 
-# --- Configurar chave da API ---
+st.set_page_config(page_title="Simulador de OKRs com IA", page_icon="🎯")
+st.title("🎯 Simulador de OKRs com IA para Dados e BI")
+
+# --- API KEY ---
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# --- Função do Agente OpenAI para gerar OKRs ---
+# --- EmailJS ---
+EMAILJS_SERVICE_ID = "masterclass"
+EMAILJS_TEMPLATE_ID = "masterclass"
+EMAILJS_USER_ID = "FErZC3v5hYjeGxyax"
+EMAILJS_URL = "https://api.emailjs.com/api/v1.0/email/send"
+
+# --- Sessão ---
+for key in ["etapa", "nome", "email", "desafio", "okr_df", "respostas"]:
+    if key not in st.session_state:
+        st.session_state[key] = None if key in ["nome", "email", "desafio"] else "inicio" if key == "etapa" else pd.DataFrame() if key == "okr_df" else []
+
+# --- Funções ---
 def gerar_okr(desafio):
     prompt = f"""
     Crie um OKR para a área de Business Intelligence com base no seguinte desafio:
@@ -21,7 +35,6 @@ def gerar_okr(desafio):
     - [KR2]
     - [KR3]
     """
-
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -29,50 +42,37 @@ def gerar_okr(desafio):
             {"role": "user", "content": prompt}
         ]
     )
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content
 
-# --- Gera recomendação com base no progresso ---
 def gerar_recomendacao(kr, progresso):
-    prompt = f"""
-    O Resultado-Chave abaixo está com progresso em {progresso}%. Sugira melhorias, ações corretivas ou apoio:
-
-    KR: {kr}
-    """
-
+    prompt = f"O KR '{kr}' está com {progresso}%. Sugira melhorias, ações ou apoio."
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Você é um analista de desempenho de OKR para dados e BI."},
+            {"role": "system", "content": "Você é analista de desempenho de OKRs."},
             {"role": "user", "content": prompt}
         ]
     )
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content
 
-# --- Envio de e-mail via EmailJS ---
-def enviar_email_via_emailjs(destinatario, nome, email, df):
-    service_id = "masterclass"
-    template_id = "masterclass"
-    user_id = "FErZC3v5hYjeGxyax"
-    url = "https://api.emailjs.com/api/v1.0/email/send"
-
+def enviar_email(destinatario, nome, email, df):
     corpo = f"OKRs gerados para {nome} ({email}):\n\n"
     corpo += df.to_string(index=False)
 
-    prompt = f"Gere uma análise executiva dos seguintes OKRs:\n\n{df.to_string(index=False)}"
-    response = openai.ChatCompletion.create(
+    analise = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Você é um consultor sênior em gestão de desempenho e estratégias com OKR."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": "Você é um consultor de estratégia com OKR."},
+            {"role": "user", "content": f"Analise esses OKRs:\n\n{df.to_string(index=False)}"}
         ]
-    )
-    analise = response["choices"][0]["message"]["content"]
+    ).choices[0].message.content
+
     corpo += f"\n\nAnálise da IA:\n{analise}"
 
     payload = {
-        "service_id": service_id,
-        "template_id": template_id,
-        "user_id": user_id,
+        "service_id": EMAILJS_SERVICE_ID,
+        "template_id": EMAILJS_TEMPLATE_ID,
+        "user_id": EMAILJS_USER_ID,
         "template_params": {
             "to_email": destinatario,
             "from_name": nome,
@@ -80,79 +80,90 @@ def enviar_email_via_emailjs(destinatario, nome, email, df):
             "message": corpo
         }
     }
-    response = requests.post(url, json=payload)
-    return response.status_code, response.text
+    return requests.post(EMAILJS_URL, json=payload)
 
-# --- Inicializa session_state ---
-if "novos_df" not in st.session_state:
-    st.session_state.novos_df = pd.DataFrame()
+# --- Etapa 1: Formulário ---
+if st.session_state.etapa == "inicio":
+    with st.form("form_identificacao"):
+        nome = st.text_input("Seu nome completo:")
+        email = st.text_input("Seu e-mail:")
+        desafio = st.text_area("Descreva seu desafio de BI/Dados:")
+        destinatario = st.text_input("E-mail para envio do resultado:")
+        enviar = st.form_submit_button("Gerar OKR com IA")
 
-# --- Interface ---
-st.title("🌟 Simulador de OKR com IA para Dados e BI")
-st.markdown("Crie, acompanhe e analise OKRs com apoio de Inteligência Artificial.")
+    if enviar and nome and email and desafio and destinatario:
+        st.session_state.nome = nome
+        st.session_state.email = email
+        st.session_state.desafio = desafio
+        resultado = gerar_okr(desafio)
+        linhas = resultado.splitlines()
+        objetivo = linhas[1].replace("- ", "")
+        data_inicio = str(datetime.date.today())
+        data_fim = str(datetime.date.today() + datetime.timedelta(days=90))
+        registros = []
+        for linha in linhas:
+            if linha.startswith("- ") and linha != linhas[1]:
+                registros.append({
+                    "Objetivo": objetivo,
+                    "KR": linha.replace("- ", ""),
+                    "Progresso (%)": 0,
+                    "Início": data_inicio,
+                    "Limite": data_fim
+                })
+        df = pd.DataFrame(registros)
+        st.session_state.okr_df = df
+        st.session_state.etapa = "progresso"
+        st.rerun()
 
-area = st.selectbox("Área responsável:", ["Dados", "BI", "DataOps", "Governança", "Outro"])
-desafio = st.text_area("Descreva seu desafio:")
-nome = st.text_input("Seu nome completo:")
-email = st.text_input("Seu e-mail:")
-destinatario = st.text_input("E-mail para envio dos OKRs:")
+# --- Etapa 2: Progresso ---
+elif st.session_state.etapa == "progresso":
+    st.subheader("📌 OKRs Gerados")
+    st.dataframe(st.session_state.okr_df)
+    st.subheader("📈 Atualize o progresso dos KRs")
 
-if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario:
-    resultado = gerar_okr(desafio)
-    st.success("OKR Gerado:")
-    st.code(resultado, language='markdown')
+    with st.form("form_progresso"):
+        novos_valores = []
+        for i, row in st.session_state.okr_df.iterrows():
+            progresso = st.slider(
+                f"{row['KR']}", 0, 100, int(row["Progresso (%)"]), key=f"prog_{i}"
+            )
+            novos_valores.append(progresso)
+        if st.form_submit_button("Gerar Recomendações e Enviar por E-mail"):
+            for i, p in enumerate(novos_valores):
+                st.session_state.okr_df.at[i, "Progresso (%)"] = p
+            st.session_state.etapa = "analise"
+            st.rerun()
 
-    linhas = resultado.splitlines()
-    objetivo = linhas[1].replace("- ", "") if len(linhas) > 1 else ""
-    novos_okrs = []
-    for linha in linhas:
-        if linha.startswith("- ") and linha != linhas[1]:
-            kr = linha.replace("- ", "")
-            novos_okrs.append({
-                "Área": area,
-                "Objetivo": objetivo,
-                "KR": kr,
-                "Progresso (%)": 0,
-                "Data de Início": str(datetime.date.today()),
-                "Data Limite": str(datetime.date.today() + datetime.timedelta(days=90))
-            })
+# --- Etapa 3: Análise e envio ---
+elif st.session_state.etapa == "analise":
+    st.subheader("📤 Enviando Análise e Recomendações")
+    df = st.session_state.okr_df
+    for i, row in df.iterrows():
+        recomendacao = gerar_recomendacao(row["KR"], row["Progresso (%)"])
+        st.markdown(f"**KR:** {row['KR']}")
+        st.markdown(f"**Progresso:** {row['Progresso (%)']}%")
+        st.info(f"💡 Recomendação da IA: {recomendacao}")
+        st.divider()
 
-    novos_df = pd.DataFrame(novos_okrs)
-    st.session_state.novos_df = novos_df
-
-    st.subheader("Resultados-Chave")
-    st.dataframe(novos_df)
-
-    status, resposta = enviar_email_via_emailjs(destinatario, nome, email, novos_df)
-    if status == 200:
-        st.success("E-mail com os OKRs enviado com sucesso!")
+    status = enviar_email(
+        destinatario=st.session_state.email,
+        nome=st.session_state.nome,
+        email=st.session_state.email,
+        df=st.session_state.okr_df
+    )
+    if status.status_code == 200:
+        st.success("✅ E-mail enviado com sucesso!")
     else:
-        st.error("Erro ao enviar e-mail: " + resposta)
+        st.error(f"❌ Falha ao enviar e-mail: {status.text}")
 
-# --- Atualização de progresso simples ---
-st.subheader("📊 Simulação de Progresso")
-if not st.session_state.novos_df.empty:
-    with st.form("Atualizar KR"):
-        index_map = st.session_state.novos_df.index.tolist()
-        if index_map:
-            index = st.selectbox("Selecione o KR:", index_map)
-            novo_progresso = st.slider("Novo progresso (%)", 0, 100, int(st.session_state.novos_df.loc[index, "Progresso (%)"]))
-            if st.form_submit_button("Atualizar"):
-                st.session_state.novos_df.at[index, "Progresso (%)"] = novo_progresso
-                st.success("Progresso atualizado!")
-                recomendacao = gerar_recomendacao(st.session_state.novos_df.loc[index, "KR"], novo_progresso)
-                st.info("Recomendação da IA:")
-                st.write(recomendacao)
-        else:
-            st.warning("Nenhum KR disponível.")
+    st.button("🔁 Reiniciar", on_click=lambda: st.session_state.update({
+        "etapa": "inicio",
+        "okr_df": pd.DataFrame(),
+        "nome": None,
+        "email": None,
+        "desafio": None
+    }))
 
-    st.subheader("Progresso Atualizado")
-    st.dataframe(st.session_state.novos_df)
-    st.bar_chart(st.session_state.novos_df.set_index("KR")["Progresso (%)"])
-
-# --- Exportar dados ---
-if not st.session_state.novos_df.empty:
-    st.download_button("📄 Exportar OKRs", st.session_state.novos_df.to_csv(index=False), file_name="okr_exportados.csv")
 
 
 
