@@ -34,6 +34,17 @@ def gerar_recomendacao(kr, progresso):
     )
     return response.choices[0].message.content
 
+def avaliar_kr_com_base_no_objetivo(objetivo, kr):
+    prompt = f"Avalie se o seguinte Resultado-Chave (KR) está bem alinhado ao Objetivo apresentado. Dê uma resposta crítica, indique pontos de melhoria e diga se o KR está claro, mensurável e relevante.\n\nObjetivo: {objetivo}\nKR: {kr}"
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "Você é especialista em gestão com foco em OKRs."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response.choices[0].message.content
+
 def enviar_email(destinatario, nome, email, df):
     corpo = f"OKRs inseridos por {nome} ({email}):\n\n"
     corpo += df.to_string(index=False)
@@ -119,13 +130,15 @@ elif st.session_state.etapa == "progresso":
 
 # --- Etapa 3: Recomendação e envio ---
 elif st.session_state.etapa == "analise":
-    st.subheader("📤 Recomendação da IA por KR")
+    st.subheader("📤 Avaliação e Recomendação da IA por KR")
     df = st.session_state.okr_df
     for i, row in df.iterrows():
         recomendacao = gerar_recomendacao(row["KR"], row["Progresso (%)"])
+        avaliacao_kr = avaliar_kr_com_base_no_objetivo(row["Objetivo"], row["KR"])
         st.markdown(f"**KR:** {row['KR']}")
         st.markdown(f"**Progresso:** {row['Progresso (%)']}%")
         st.info(f"💡 Recomendação da IA: {recomendacao}")
+        st.warning(f"🧠 Avaliação do KR em relação ao Objetivo: {avaliacao_kr}")
         st.divider()
 
     status = enviar_email(
