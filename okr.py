@@ -6,9 +6,8 @@ import json
 import os
 import requests
 
-# --- API Keys dinâmicas ---
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else st.text_input("Insira sua OpenAI API Key", type="password")
-##ASSISTANT_ID = st.secrets["ASSISTANT_ID"] if "ASSISTANT_ID" in st.secrets else st.text_input("Insira seu Assistant ID", type="password")
+# --- API Key via Streamlit Secrets ---
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else ""
 openai.api_key = OPENAI_API_KEY
 
 # --- Caminho do arquivo de persistência ---
@@ -115,6 +114,10 @@ def salvar_dados(df):
 st.title("🎯 Simulador de OKR para Dados e BI")
 st.markdown("Crie, acompanhe e compartilhe OKRs com apoio de Inteligência Artificial.")
 
+if not OPENAI_API_KEY:
+    st.warning("⚠️ A chave da OpenAI não foi configurada. Adicione-a em secrets.toml ou via campo acima.")
+    st.stop()
+
 # Carrega dados salvos
 df = carregar_dados()
 
@@ -134,7 +137,6 @@ if st.button("Gerar OKR com IA") and desafio and nome and email and destinatario
     st.success("OKR Gerado:")
     st.code(resultado, language='markdown')
 
-    # Extração dinâmica
     linhas = resultado.splitlines()
     objetivo = ""
     novos_okrs = []
@@ -195,5 +197,6 @@ with st.form("Atualizar KR"):
 st.subheader("📈 Evolução Visual")
 if not okr_filtrados.empty:
     st.bar_chart(okr_filtrados.set_index("KR")["Progresso (%)"])
+
 
 
