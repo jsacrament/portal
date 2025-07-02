@@ -6,8 +6,10 @@ import json
 import os
 import requests
 
-# --- Configurar chave da API ---
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# --- API Keys dinâmicas ---
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else st.text_input("Insira sua OpenAI API Key", type="password")
+ASSISTANT_ID = st.secrets["ASSISTANT_ID"] if "ASSISTANT_ID" in st.secrets else st.text_input("Insira seu Assistant ID", type="password")
+openai.api_key = OPENAI_API_KEY
 
 # --- Caminho do arquivo de persistência ---
 DATA_PATH = "okr_data.json"
