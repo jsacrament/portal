@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import pandas as pd
 import datetime
 import requests
@@ -8,7 +8,7 @@ st.set_page_config(page_title="Simulador de OKRs com IA", page_icon="🎯")
 st.title("🎯 Simulador de OKRs com IA para Dados e BI")
 
 # --- API KEY ---
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # --- EmailJS ---
 EMAILJS_SERVICE_ID = "masterclass"
@@ -35,7 +35,7 @@ def gerar_okr(desafio):
     - [KR2]
     - [KR3]
     """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "Você é um especialista em OKRs para equipes de dados."},
@@ -46,7 +46,7 @@ def gerar_okr(desafio):
 
 def gerar_recomendacao(kr, progresso):
     prompt = f"O KR '{kr}' está com {progresso}%. Sugira melhorias, ações ou apoio."
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "Você é analista de desempenho de OKRs."},
@@ -59,7 +59,7 @@ def enviar_email(destinatario, nome, email, df):
     corpo = f"OKRs gerados para {nome} ({email}):\n\n"
     corpo += df.to_string(index=False)
 
-    analise = openai.ChatCompletion.create(
+    analise = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "Você é um consultor de estratégia com OKR."},
@@ -163,7 +163,5 @@ elif st.session_state.etapa == "analise":
         "email": None,
         "desafio": None
     }))
-
-
 
 
