@@ -1,5 +1,0 @@
-streamlit
-openai
-python-docx
-streamlit-authenticator
-pyyaml
