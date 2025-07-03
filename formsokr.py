@@ -5,7 +5,7 @@ import datetime
 import requests
 
 st.set_page_config(page_title="Formulário OKR com IA", page_icon="🛰️")
-st.title("🛰️ Missão OKR: Construindo o Futuro da Equipe de Dados e BI")
+st.title("🛰️ Missão OKR: Construindo o Futuro da Equipe de BI")
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 ASSISTANT_ID = st.secrets["ASSISTANT_ID"]
@@ -23,7 +23,7 @@ def enviar_email(destinatario, nome, email, df):
     corpo += df.to_string(index=False)
 
     analise = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "Você é um consultor de OKR."},
             {"role": "user", "content": f"Analise este formulário de OKR:\n\n{df.to_string(index=False)}"}
