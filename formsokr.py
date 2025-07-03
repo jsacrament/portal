@@ -23,7 +23,7 @@ def enviar_email(destinatario, nome, email, df):
     corpo += df.to_string(index=False)
 
     analise = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Você é um consultor de OKR."},
             {"role": "user", "content": f"Analise este formulário de OKR:\n\n{df.to_string(index=False)}"}
