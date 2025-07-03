@@ -7,42 +7,44 @@ import time
 st.set_page_config(page_title="Detector de Texto IA ou Humano", page_icon="🕵️")
 st.title("🕵️ Detector de Texto: Humano ou ChatGPT?")
 
-# Inicialização da API
+# Inicialização do cliente da OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 ASSISTANT_ID = st.secrets["ASSISTANT_ID"]
 
-# Formulário de entrada
+# Formulário de entrada do texto
 with st.form("form_analise"):
     texto = st.text_area("Cole aqui o texto para análise:")
     enviar = st.form_submit_button("Analisar Texto")
 
+# Executar se texto for submetido
 if enviar and texto:
-    prompt_chatgpt = f"""
-Você é um detector treinado para identificar textos gerados por modelos da família ChatGPT (como GPT-3.5 e GPT-4). Sua tarefa é analisar o seguinte texto e indicar com base em estilo, estrutura e padrões linguísticos se ele foi provavelmente escrito por um ser humano ou por um modelo ChatGPT.
+    # Prompt especializado para detecção de textos do ChatGPT
+    prompt = f"""
+Você é um avaliador altamente treinado para detectar textos gerados por modelos da família ChatGPT (como GPT-3.5 e GPT-4). Seu objetivo é analisar cuidadosamente o seguinte texto e indicar, com base em estrutura, estilo e padrões linguísticos, se ele foi escrito por um humano ou por IA.
 
-Considere os seguintes sinais comuns de texto gerado por ChatGPT:
-- Estrutura excessivamente organizada e limpa
-- Uso sistemático de conectores como "além disso", "em síntese", "por outro lado"
-- Falta de subjetividade ou posicionamento pessoal explícito
-- Frases muito completas e explicativas, com tom enciclopédico
-- Pouca digressão, erros ou hesitações naturais
-- Uso recorrente de expressões genéricas e neutras
+Leve em consideração os seguintes critérios:
+- Uso excessivo de conectores estruturados e linguagem formal demais
+- Ausência de hesitações, pausas reflexivas ou digressões naturais
+- Organização rígida (introdução, desenvolvimento, conclusão) sem variação estilística
+- Frases muito explicativas, com tom neutro ou enciclopédico
+- Pouca subjetividade, opiniões ou experiências pessoais
 
-Texto a ser analisado:
+Analise o texto abaixo e forneça:
+1. Uma justificativa detalhada sobre os sinais que indicam autoria humana ou por IA.
+2. Uma **pontuação de probabilidade de autoria humana de 0 a 100**, sendo:
+   - 0 a 40 → Muito provavelmente IA
+   - 41 a 70 → Pode ter sido revisado ou iniciado por IA
+   - 71 a 98 → Provavelmente humano, mas com traços artificiais
+   - 99 a 100 → Muito provavelmente escrito por um humano com estilo autêntico e não-automatizado
+
+Texto para análise:
 \"\"\"{texto}\"\"\"
-
-Justifique sua análise com base nos critérios linguísticos e estruturais observados.
-
-Ao final, atribua uma **pontuação de probabilidade de ter sido gerado por ChatGPT**, entre 0 e 100:
-- 0 a 40: Muito improvável que seja ChatGPT
-- 41 a 70: Pode ter influência ou revisão de ChatGPT
-- 71 a 100: Muito provavelmente foi escrito com ChatGPT
 """
 
-    with st.spinner("Analisando com o detector especializado em ChatGPT..."):
+    with st.spinner("Analisando com o agente..."):
         resposta = client.beta.threads.create_and_run(
             assistant_id=ASSISTANT_ID,
-            thread={"messages": [{"role": "user", "content": prompt_chatgpt}]}
+            thread={"messages": [{"role": "user", "content": prompt}]}
         )
 
         thread_id = resposta.thread_id
@@ -63,6 +65,7 @@ Ao final, atribua uma **pontuação de probabilidade de ter sido gerado por Chat
         st.subheader("🔍 Resultado da Análise")
         st.markdown(resposta_assistente)
 
+        # Captura de pontuação com validação segura
         matches = re.findall(r"(\d{1,3})", resposta_assistente)
         scores_validos = [int(m) for m in matches if 0 <= int(m) <= 100]
 
@@ -70,12 +73,16 @@ Ao final, atribua uma **pontuação de probabilidade de ter sido gerado por Chat
             score = max(scores_validos)
             st.progress(score)
 
-            if score < 41:
-                st.success("✅ Muito improvável que tenha sido gerado por ChatGPT.")
-            elif score < 71:
-                st.info("ℹ️ Pode ter sido influenciado ou revisado por ChatGPT.")
+            # Lógica de avaliação refinada
+            if score >= 99:
+                st.success("✅ Muito provavelmente escrito por um humano autêntico (≥ 99%).")
+            elif score >= 71:
+                st.info("🧠 Provavelmente escrito por um humano, mas com traços que lembram IA.")
+            elif score >= 41:
+                st.warning("⚠️ Pode ter sido iniciado ou revisado por IA.")
             else:
-                st.warning("⚠️ Alta probabilidade de ter sido gerado por ChatGPT.")
+                st.error("❌ Muito provavelmente gerado por IA (≤ 40%).")
         else:
             st.text("Pontuação de autenticidade não identificada.")
+
 
