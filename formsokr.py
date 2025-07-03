@@ -18,7 +18,18 @@ EMAILJS_URL = "https://api.emailjs.com/api/v1.0/email/send"
 if "etapa" not in st.session_state:
     st.session_state.etapa = "formulario"
 
-def enviar_email(destinatario, nome, email, df):
+def verificar_autenticidade_respostas(df):
+    prompt = f"Analise as respostas a seguir e indique se parecem ter sido geradas por um ser humano ou por uma IA. Dê uma pontuação de 0 a 100 para o grau de autenticidade humana (quanto maior, mais humano).\n\n{df.to_string(index=False)}"
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "Você é um detector de respostas geradas por inteligência artificial."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response.choices[0].message.content
+
+def enviar_email(destinatario, nome, email, df, autenticidade):
     corpo = f"Formulário preenchido por {nome} ({email}):\n\n"
     corpo += df.to_string(index=False)
 
@@ -31,6 +42,7 @@ def enviar_email(destinatario, nome, email, df):
     ).choices[0].message.content
 
     corpo += f"\n\nAnálise da IA:\n{analise}"
+    corpo += f"\n\nValidação de autenticidade das respostas:\n{autenticidade}"
 
     payload = {
         "service_id": EMAILJS_SERVICE_ID,
@@ -96,10 +108,34 @@ if st.session_state.etapa == "formulario":
             "Quer Oficina?": oficina
         }])
 
-        status = enviar_email(destinatario, nome, email, df)
+        autenticidade = verificar_autenticidade_respostas(df)
+
+        st.markdown("---")
+        st.subheader("🔎 Validação de Autenticidade das Respostas")
+        st.info(autenticidade)
+
+        if "grau de autenticidade" in autenticidade.lower():
+            try:
+                import re
+                match = re.search(r"(\d{1,3})", autenticidade)
+                if match:
+                    score = int(match.group(1))
+                    st.progress(score if score <= 100 else 100)
+                    if score < 50:
+                        st.warning("⚠️ As respostas podem ter sido geradas por IA. Avalie com cuidado.")
+                    elif score < 80:
+                        st.info("ℹ️ As respostas parecem parcialmente humanas.")
+                    else:
+                        st.success("✅ As respostas parecem ter sido escritas por um humano.")
+            except:
+                st.text("Erro ao extrair a pontuação de autenticidade.")
+
+        status = enviar_email(destinatario, nome, email, df, autenticidade)
+
         if status.status_code == 200:
-            st.success("✅ Formulário enviado com sucesso! Análise da IA enviada por e-mail.")
+            st.success("✅ Formulário enviado com sucesso! Análise da IA e verificação de autenticidade enviadas por e-mail.")
         else:
             st.error(f"❌ Erro ao enviar o e-mail: {status.text}")
 
         st.session_state.clear()
+
