@@ -10,32 +10,6 @@ from email.mime.multipart import MIMEMultipart
 # Configurações
 st.set_page_config(page_title="🎯 Quiz OKRs", page_icon="🎯", layout="centered")
 
-# Função para enviar e-mail
-def enviar_email(destinatario, assunto, corpo):
-    import os
-    remetente = os.getenv("EMAIL_REMETENTE")
-    senha = os.getenv("EMAIL_SENHA")
-    msg = MIMEMultipart()
-    msg['From'] = remetente
-    msg['To'] = destinatario
-    msg['Subject'] = assunto
-    msg.attach(MIMEText(corpo, 'plain'))
-
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(remetente, senha)
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        st.error(f"Erro ao enviar e-mail: {e}")
-        return False
-
-# Função para gerar QR Code
-def gerar_qrcode(link):
-    img = qrcode.make(link)
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    st.image(buf.getvalue(), caption="📲 Escaneie para fazer novamente")
 
 # Cabeçalho
 st.title("🎯 Quiz 1 – Fundamentos dos OKRs")
@@ -134,7 +108,7 @@ if st.session_state.get("quiz_iniciado"):
             st.error("🚨 É recomendável revisar os conceitos fundamentais de OKRs.")
 
         corpo = f"Olá! Você concluiu o Quiz OKR com {score}/10 acertos. Obrigado por participar!"
-        enviar_email(email, "Resultado do seu Quiz OKR", corpo)
+       
 
      
 
