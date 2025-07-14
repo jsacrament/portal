@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import smtplib
@@ -137,11 +136,7 @@ if st.session_state.get("quiz_iniciado"):
         else:
             st.error("🚨 É recomendável revisar os conceitos fundamentais de OKRs.")
 
-        corpo = f"Olá!
-
-Você concluiu o Quiz OKR com {score}/10 acertos.
-
-Obrigado por participar!"
+        corpo = f"Olá! Você concluiu o Quiz OKR com {score}/10 acertos. Obrigado por participar!"
         enviar_email(email, "Resultado do seu Quiz OKR", corpo)
 
         gerar_qrcode("https://quiz-okr.streamlit.app")  # ou link local
