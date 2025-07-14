@@ -139,14 +139,5 @@ if st.session_state.get("quiz_iniciado"):
         corpo = f"Olá! Você concluiu o Quiz OKR com {score}/10 acertos. Obrigado por participar!"
         enviar_email(email, "Resultado do seu Quiz OKR", corpo)
 
-        gerar_qrcode("https://quiz-okr.streamlit.app")  # ou link local
-        st.info("🔁 Escaneie o QR Code para refazer o quiz.")
+     
 
-        # Mostrar top 5 ranking
-        try:
-            df_total = pd.read_csv("ranking.csv")
-            top5 = df_total.sort_values(by="pontuacao", ascending=False).head(5)
-            st.subheader("🏆 Top 5 Pontuações")
-            st.table(top5)
-        except:
-            st.warning("⚠️ Ranking ainda não disponível.")
