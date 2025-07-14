@@ -4,3 +4,4 @@ python-docx
 streamlit-authenticator
 pyyaml
 requests
+qrcode
