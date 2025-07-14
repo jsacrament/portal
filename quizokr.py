@@ -121,10 +121,7 @@ if st.session_state.get("quiz_iniciado"):
     if st.button("Enviar respostas"):
         data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         df = pd.DataFrame([[email, score, data]], columns=["email", "pontuacao", "data"])
-        try:
-            df.to_csv("ranking.csv", mode="a", header=not Path("ranking.csv").exists(), index=False)
-        except:
-            st.warning("⚠️ Não foi possível gravar a pontuação localmente.")
+     
 
         st.success(f"✅ Você acertou {score} de 10 perguntas!")
         if score == 10:
