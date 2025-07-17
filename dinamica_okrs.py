@@ -101,10 +101,11 @@ dificuldade = st.radio(
 impacto = st.text_area("Como a clareza nos OKRs pode impactar os resultados do time de dados?")
 aplicacao = st.text_area("Você vê aplicação imediata dessa metodologia na sua rotina de trabalho? Justifique.")
 
-# Botão para envio de e-mail
+# Botão para envio de e-mail (oculto ao usuário)
 st.header("9. Enviar Respostas por E-mail")
 
-destinatario = st.text_input("E-mail de destino (facilitador ou seu próprio e-mail):", value=email)
+# >>>>>>>> Defina o destinatário aqui <<<<<<<<<
+destinatario = "facilitador@email.com"  # Troque para o e-mail desejado
 
 if st.button("Enviar por E-mail"):
     # Montar DataFrame com as respostas
@@ -127,8 +128,10 @@ if st.button("Enviar por E-mail"):
     total_pontos = 10 * sum([bool(str(v).strip()) for v in data["Resposta"]])
     status, retorno = enviar_email_via_emailjs(destinatario, nome, email, df, total_pontos)
     if status == 200:
-        st.success(f"E-mail enviado com sucesso para {destinatario}!")
+        st.success(f"E-mail enviado com sucesso para o facilitador!")
     else:
         st.error(f"Falha ao enviar o e-mail: {retorno}")
+
+
 
 
