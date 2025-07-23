@@ -9,3 +9,5 @@ pandas
 matplotlib
 wordcloud
 streamlit-autorefresh
+gspread
+oauth2client
