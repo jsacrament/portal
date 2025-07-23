@@ -29,28 +29,29 @@ perguntas = [
 ]
 
 justificativas = [
-    "O objetivo deve inspirar e engajar, com direcionamento qualitativo claro.",
-    "Esse KR é claro, mensurável e impacta o core do time de Engenharia de Dados.",
-    "Cascatear OKRs é alinhar desde o topo da empresa até o individual.",
-    "Mais de 5 KRs por objetivo dificulta o foco e a execução.",
-    "Resultados-chave precisam ser mensuráveis e objetivos.",
-    "Antes de tudo, entenda a estratégia do negócio para criar OKRs relevantes.",
-    "OKRs alinham o time ao que realmente importa naquele ciclo.",
-    "TMA é uma métrica clássica de Call Center, usada para medir eficiência.",
-    "Adoção de Insights mede o quanto as recomendações de dados viram ação de fato.",
-    "O exercício desafia você a definir OKRs aplicados a um caso real e prático."
+    "O objetivo precisa engajar, ser inspirador e mostrar direção clara. O mensurável é papel do KR.",
+    "KR relevante para Engenharia de Dados foca em resultado concreto e melhoria do core do time.",
+    "Cascatear OKRs é garantir alinhamento dos objetivos do estratégico ao operacional/individual.",
+    "Evite ter mais de 5 KRs por objetivo para não dispersar o foco e dificultar a gestão.",
+    "Resultados-chave (KRs) precisam ser mensuráveis e claros, nunca vagos ou subjetivos.",
+    "Antes de definir OKRs, compreenda a estratégia do negócio para garantir relevância.",
+    "OKRs focam esforços do time no que é prioridade real de cada ciclo, evitando dispersão.",
+    "TMA é métrica clássica e útil de call center, ajudando a medir eficiência e atendimento.",
+    "Adoção de Insights mede a ação efetiva baseada em recomendações de dados, não só relatório.",
+    "O exercício coloca a teoria na prática, desafiando a construir OKRs de um caso real."
 ]
+
 dicas = [
-    "💡 Objetivos inspiram, KRs medem.",
-    "⏱️ Foco em eficiência e melhoria de processos.",
-    "🔄 Alinhamento de ponta a ponta traz resultados.",
-    "🔢 Limite os KRs para manter clareza e foco.",
-    "📏 Mensurável = você consegue comprovar que fez!",
-    "🗺️ Sem estratégia, não há direção.",
-    "🎯 Foco é o grande diferencial do OKR.",
-    "☎️ TMA mostra onde melhorar no atendimento.",
-    "🟢 Medir impacto é o que importa nos dados.",
-    "🔎 O aprendizado é prático e aplicável ao seu dia a dia."
+    "💡 Objetivos motivam, KRs comprovam resultado.",
+    "⏱️ Sempre busque KRs mensuráveis e com impacto claro.",
+    "🔄 Alinhamento estratégico traz resultado concreto.",
+    "🔢 Mantenha foco: limite os KRs para execução eficaz.",
+    "📏 KR sempre com número, prazo ou parâmetro.",
+    "🗺️ Estratégia é o ponto de partida de bons OKRs.",
+    "🎯 Foco do time é diferencial em ambientes de dados.",
+    "☎️ TMA é KPI clássico em operações de atendimento.",
+    "🟢 O que importa é recomendação implementada.",
+    "🔎 OKRs práticos aceleram aprendizado real!"
 ]
 
 respostas_usuario = []
