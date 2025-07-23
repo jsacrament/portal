@@ -1,26 +1,31 @@
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 import pandas as pd
-from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-# Atualização automática a cada 5 segundos
-st_autorefresh(interval=5000, key="refresh")
+# ---- Autenticação Google Sheets ----
+scope = [
+    'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/drive'
+]
+# Substitua pelo nome do seu arquivo de credenciais
+credentials = ServiceAccountCredentials.from_json_keyfile_name('credenciais.json', scope)
+gc = gspread.authorize(credentials)
 
-st.set_page_config(page_title="Simulador de KRs com Nuvem e Votação", page_icon="✨", layout="centered")
-st.title("✨ Simulador de KRs para OKR - Nuvem de Palavras & Votação")
+# Substitua pelo nome da sua planilha e aba
+planilha_nome = 'OKR_KRs'
+aba_nome = 'Sheet1'
+sheet = gc.open(planilha_nome).worksheet(aba_nome)
+
+st.set_page_config(page_title="Simulador Colaborativo OKR", page_icon="✨", layout="centered")
+st.title("✨ Simulador Colaborativo de KRs para OKR")
 st.markdown("Cada participante pode sugerir um KR para o OKR abaixo e votar nos seus favoritos.")
 
-# OKR do exercício
-okr = st.text_area("OKR Proposto (Objetivo):", "Aumentar o engajamento dos usuários no uso Dashboards.")
+okr = st.text_area("OKR Proposto (Objetivo):", "Aumentar o engajamento dos clientes na plataforma digital.")
 
-if 'krs_list' not in st.session_state:
-    st.session_state['krs_list'] = []
-if 'votes' not in st.session_state:
-    st.session_state['votes'] = {}
-
-st.markdown("## 💡 Sugira seu KR")
+# --- Submissão de KR ---
 with st.form("kr_form", clear_on_submit=True):
     email = st.text_input("Seu e-mail ou apelido (único):", max_chars=60)
     kr = st.text_input("Sua sugestão de KR:", max_chars=120)
@@ -28,24 +33,30 @@ with st.form("kr_form", clear_on_submit=True):
     if enviar:
         if not email or not kr:
             st.warning("Preencha seu e-mail e seu KR.")
-        elif any(email.lower() == k['email'].lower() for k in st.session_state['krs_list']):
-            st.warning("Você já enviou um KR.")
-        elif len(st.session_state['krs_list']) >= 110:
-            st.warning("Limite de 110 participações atingido.")
         else:
-            st.session_state['krs_list'].append({"email": email, "kr": kr})
+            # Checa se já existe KR para esse e-mail
+            todos = sheet.get_all_records()
+            ja_tem = any(str(email).strip().lower() == str(x["email"]).strip().lower() for x in todos)
+            if ja_tem:
+                st.warning("Você já enviou um KR.")
+            elif len(todos) >= 110:
+                st.warning("Limite de 110 participações atingido.")
+            else:
+                # Adiciona linha: [email, kr, votos=0]
+                sheet.append_row([email, kr, 0])
+                st.success("KR enviado com sucesso!")
 
-st.markdown("---")
+# --- Lê todos os KRs (atualizado para todos) ---
+todos = sheet.get_all_records()
+df = pd.DataFrame(todos)
 
-df = pd.DataFrame(st.session_state['krs_list'])
-
+st.markdown(f"### 👥 KRs sugeridos ({len(df)}/110)")
 if not df.empty:
-    st.markdown(f"### 👥 KRs sugeridos ({len(df)}/110)")
-    df_exibe = df.copy()
-    df_exibe.index.name = "ID"
-    st.dataframe(df_exibe[["kr"]], use_container_width=True)
+    df_show = df[["email", "kr", "votos"]]
+    df_show.columns = ["E-mail", "KR sugerido", "Votos"]
+    st.dataframe(df_show, use_container_width=True)
 
-    # Nuvem de palavras (WordCloud)
+    # --- Nuvem de palavras ---
     st.markdown("#### ☁️ Nuvem de Palavras dos KRs")
     texto = " ".join(df["kr"].tolist())
     if texto.strip():
@@ -57,44 +68,38 @@ if not df.empty:
     else:
         st.info("Aguardando sugestões para montar a nuvem de palavras.")
 
-    # Votação nos melhores KRs
-    st.markdown("#### 🗳️ Vote nos KRs que você mais gostou (até 3 votos)")
-    voto_email = st.text_input("Seu e-mail/apelido para votar:", key="voto_email")
-    if voto_email:
-        if voto_email.lower() not in [k['email'].lower() for k in st.session_state['krs_list']]:
+    # --- Votação ---
+    st.markdown("#### 🗳️ Vote no KR que você mais gostou (1 voto por pessoa)")
+    email_votante = st.text_input("Seu e-mail/apelido para votar:", key="voto_email")
+    if email_votante:
+        if email_votante.strip().lower() not in [str(e).strip().lower() for e in df["E-mail"]]:
             st.info("Só pode votar quem já sugeriu KR.")
         else:
-            votados = st.session_state['votes'].get(voto_email.lower(), [])
-            options = [f"ID {i} - {kr}" for i, kr in enumerate(df["kr"])]
-            votos = st.multiselect("Escolha até 3 KRs (pelo número/descrição):", options, default=[options[i] for i in votados] if votados else [], max_selections=3)
-            submit_vote = st.button("Registrar meus votos")
-            if submit_vote:
-                idxs = [int(v.split()[1]) for v in votos]
-                st.session_state['votes'][voto_email.lower()] = idxs
-                st.success("Voto(s) registrado(s)!")
+            opcoes = [f"{i+1} - {kr}" for i, kr in enumerate(df["KR sugerido"])]
+            escolha = st.selectbox("Escolha 1 KR:", opcoes)
+            if st.button("Registrar meu voto"):
+                idx = int(escolha.split(" - ")[0]) - 1
+                # Só permite 1 voto por pessoa (pelo e-mail)
+                votos_feitos = [str(e).strip().lower() for e in df["E-mail"] if df["votos"][df["E-mail"] == e].sum() > 0]
+                if email_votante.strip().lower() in votos_feitos:
+                    st.warning("Você já votou!")
+                else:
+                    # Incrementa o voto na célula correta
+                    cell = f"C{idx+2}"  # C: votos, +2 por conta do cabeçalho e index
+                    votos_atuais = int(sheet.acell(cell).value)
+                    sheet.update_acell(cell, votos_atuais + 1)
+                    st.success("Voto registrado!")
 
-    # Mostrar contagem de votos em tempo real
+    # --- Ranking dos mais votados ---
     st.markdown("#### 🏆 Ranking dos KRs mais votados")
-    all_votes = []
-    for voted in st.session_state['votes'].values():
-        all_votes.extend(voted)
-    contagem = Counter(all_votes)
-    if contagem:
-        top = contagem.most_common(10)
-        for i, (idx, qtd) in enumerate(top, 1):
-            st.markdown(f"**{i}º** - `{df.iloc[idx]['kr']}`<br>({qtd} voto(s))", unsafe_allow_html=True)
-    else:
-        st.info("Nenhum voto registrado ainda.")
+    df_sorted = df_show.sort_values(by="Votos", ascending=False)
+    for i, row in df_sorted.head(10).iterrows():
+        st.markdown(f"**{row['KR sugerido']}** — {row['Votos']} voto(s)")
 
-    # Download
-    df_votes = df.copy()
-    df_votes["votos"] = [contagem.get(idx, 0) for idx in range(len(df))]
-    st.download_button("⬇️ Baixar todos os KRs com votos (Excel)", df_votes.to_csv(index=False), file_name="KRs_com_votos.csv")
+    # --- Download dos dados
+    st.download_button("⬇️ Baixar todos os KRs com votos (Excel)", df_show.to_csv(index=False), file_name="KRs_com_votos.csv")
 else:
     st.info("Nenhum KR enviado ainda. Participe!")
 
-if len(st.session_state['krs_list']) == 110:
+if len(df) == 110:
     st.success("Limite de 110 participações atingido! Analise os KRs com sua equipe.")
-    if st.button("Reiniciar tudo para nova rodada"):
-        st.session_state['krs_list'] = []
-        st.session_state['votes'] = {}
