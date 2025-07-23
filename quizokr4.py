@@ -16,7 +16,7 @@ q1 = st.radio("1. Você é líder de BI e quer aumentar o uso de dashboards na o
 if q1 == "b) Aumentar o uso ativo dos dashboards de 40% para 80%":
     score += 1
 
-q2 = st.radio("2. Sua equipe de engenharia de dados demora 5 horas para atualizar os indicadores diários. Qual objetivo faria sentido?", [
+q2 = st.radio("2. Sua equipe de dados demora 5 horas para atualizar os indicadores diários. Qual objetivo faria sentido?", [
     "a) Reduzir o tempo de processamento do pipeline para 15 minutos",
     "b) Aumentar a satisfação da equipe de RH",
     "c) Trocar de ferramenta de BI",
