@@ -2,11 +2,9 @@ import streamlit as st
 import random
 
 st.set_page_config(page_title="🚀 Quiz Prático de OKRs", page_icon="🚀", layout="centered")
-
 st.title("🚀 Quiz 4 – OKRs na Prática: Casos Reais e Decisões")
 st.subheader("Objetivo: Avaliar a aplicação de OKRs em contextos operacionais e tomada de decisão.")
 
-# Perguntas com resposta certa SEMPRE fora da posição A (embaralhamento controlado)
 perguntas = [
     {
         "pergunta": "Você é líder de BI e quer aumentar o uso de dashboards na operação. Qual KR seria mais adequado?",
@@ -130,57 +128,68 @@ perguntas = [
     }
 ]
 
-# Função para garantir que a opção correta nunca é a primeira
 def shift_correct_option(opcoes, correta):
     idx = opcoes.index(correta)
     if idx == 0:
-        # Troca para posição 1 (B)
         opcoes[0], opcoes[1] = opcoes[1], opcoes[0]
     return opcoes
 
-# Montar perguntas embaralhando as alternativas (exceto nunca na posição 0/A)
-random.seed(42)  # Para reprodutibilidade, remova em produção se quiser total aleatoriedade
-
+random.seed(42)
 for p in perguntas:
     opcoes = p['opcoes'][:]
-    # Embaralha e reposiciona se correta caiu na posição 0
     random.shuffle(opcoes)
     opcoes = shift_correct_option(opcoes, p['correta'])
     p['opcoes_embaralhadas'] = opcoes
 
-respostas_usuario = []
+# Salvando respostas em session_state para persistência
+if 'respostas_usuario' not in st.session_state:
+    st.session_state['respostas_usuario'] = [None]*10
+
+def update_resposta(idx, escolha):
+    st.session_state['respostas_usuario'][idx] = escolha
+
+# Exibe as perguntas e guarda as respostas
+for i, p in enumerate(perguntas):
+    st.radio(
+        f"{i+1}. {p['pergunta']}", 
+        p['opcoes_embaralhadas'], 
+        key=f"q4_{i}",
+        on_change=update_resposta, 
+        args=(i, st.session_state.get(f"q4_{i}"))
+    )
+
+todas_respondidas = all(st.session_state['respostas_usuario'])
 score = 0
 for i, p in enumerate(perguntas):
-    escolha = st.radio(f"{i+1}. {p['pergunta']}", p['opcoes_embaralhadas'], key=f"q4_{i}")
-    respostas_usuario.append(escolha)
-    if escolha == p['correta']:
+    if st.session_state['respostas_usuario'][i] == p['correta']:
         score += 1
 
-if st.button("Enviar respostas"):
-    st.markdown("---")
-    st.markdown(f"**Pontuação final:** {score}/10")
-    st.markdown("---")
-    st.subheader("Feedback detalhado:")
+if not todas_respondidas:
+    st.info("Responda todas as perguntas para enviar o quiz.")
 
-    for i, (escolha, p) in enumerate(zip(respostas_usuario, perguntas), 1):
-        if escolha == p['correta']:
-            st.markdown(f"""✅  
+if todas_respondidas:
+    if st.button("Enviar respostas"):
+        st.markdown("---")
+        st.markdown(f"**Pontuação final:** {score}/10")
+        st.markdown("---")
+        if score >= 7:
+            st.subheader("Feedback detalhado:")
+            for i, (escolha, p) in enumerate(zip(st.session_state['respostas_usuario'], perguntas), 1):
+                if escolha == p['correta']:
+                    st.markdown(f"""✅  
 {i}. Correta! {p['justificativa']}  
 ✔️ Muito bem!""")
-        else:
-            st.markdown(f"""❌  
+                else:
+                    st.markdown(f"""❌  
 {i}. Incorreta. Sua resposta: {escolha}  
 Resposta correta: {p['correta']}  
 Justificativa: {p['justificativa']}  
 {p['dica']}""")
-
-    st.markdown("---")
-    if score == 10:
-        st.balloons()
-        st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs na prática!")
-    elif score >= 7:
-        st.info("🎉 Muito bem! Você está aplicando os conceitos de OKRs em situações reais.")
-    elif score >= 4:
-        st.warning("🧐 Quase lá! Reforce os conceitos práticos de OKRs e tente novamente.")
-    else:
-        st.error("🚨 Hora de revisar como aplicar OKRs em contextos reais e decisões do dia a dia.")
+            st.markdown("---")
+            if score == 10:
+                st.balloons()
+                st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs na prática!")
+            elif score >= 7:
+                st.info("🎉 Muito bem! Você está aplicando os conceitos de OKRs em situações reais.")
+        else:
+            st.warning("Você acertou menos de 7. Tente novamente para ver o feedback detalhado!")
