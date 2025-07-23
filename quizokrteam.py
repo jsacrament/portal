@@ -13,7 +13,7 @@ st.title("✨ Simulador de KRs para OKR - Nuvem de Palavras & Votação")
 st.markdown("Cada participante pode sugerir um KR para o OKR abaixo e votar nos seus favoritos.")
 
 # OKR do exercício
-okr = st.text_area("OKR Proposto (Objetivo):", "Aumentar o engajamento dos clientes na plataforma digital.")
+okr = st.text_area("OKR Proposto (Objetivo):", "Aumentar o engajamento dos usuários no uso Dashboards.")
 
 if 'krs_list' not in st.session_state:
     st.session_state['krs_list'] = []
