@@ -1,8 +1,12 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+
+# Atualização automática a cada 5 segundos
+st_autorefresh(interval=5000, key="refresh")
 
 st.set_page_config(page_title="Simulador de KRs com Nuvem e Votação", page_icon="✨", layout="centered")
 st.title("✨ Simulador de KRs para OKR - Nuvem de Palavras & Votação")
@@ -14,7 +18,7 @@ okr = st.text_area("OKR Proposto (Objetivo):", "Aumentar o engajamento dos clien
 if 'krs_list' not in st.session_state:
     st.session_state['krs_list'] = []
 if 'votes' not in st.session_state:
-    st.session_state['votes'] = {}  # email: [idx1, idx2, ...]
+    st.session_state['votes'] = {}
 
 st.markdown("## 💡 Sugira seu KR")
 with st.form("kr_form", clear_on_submit=True):
@@ -37,7 +41,6 @@ df = pd.DataFrame(st.session_state['krs_list'])
 
 if not df.empty:
     st.markdown(f"### 👥 KRs sugeridos ({len(df)}/110)")
-    # Mostra lista resumida e IDs
     df_exibe = df.copy()
     df_exibe.index.name = "ID"
     st.dataframe(df_exibe[["kr"]], use_container_width=True)
