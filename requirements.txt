@@ -5,3 +5,6 @@ streamlit-authenticator
 pyyaml
 requests
 qrcode
+pandas
+matplotlib
+wordcloud
