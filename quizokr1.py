@@ -1,15 +1,9 @@
 import streamlit as st
 import pandas as pd
-import smtplib
-import qrcode
-import io
 from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
-# Configurações
+# Configuração
 st.set_page_config(page_title="🎯 Quiz OKRs", page_icon="🎯", layout="centered")
-
 
 # Cabeçalho
 st.title("🎯 Quiz 1 – Fundamentos dos OKRs")
@@ -20,9 +14,8 @@ if email and st.button("Iniciar Quiz"):
     st.session_state['quiz_iniciado'] = True
 
 if st.session_state.get("quiz_iniciado"):
-    score = 0
-
     perguntas = [
+        # (PERGUNTA, RESPOSTA_CORRETA, [OPCOES])
         ("O que significa a sigla OKR?", "c) Objectives and Key Results", [
             "a) Objectives and Knowledge Rate",
             "b) Organizational Key Reports",
@@ -85,30 +78,65 @@ if st.session_state.get("quiz_iniciado"):
         ])
     ]
 
-    respostas = []
+    # Justificativas e dicas por questão (adicione suas próprias se quiser)
+    justificativas = [
+        "OKR significa Objectives and Key Results, ou seja, Objetivos e Resultados-Chave.",
+        "OKRs são ambiciosos e buscam transformação real, não apenas manutenção.",
+        "KPIs olham o presente; OKRs mostram para onde ir.",
+        "Um bom objetivo deve inspirar e desafiar.",
+        "O ideal é ter de 2 a 5 KRs por objetivo para manter o foco.",
+        "Churn Rate é um indicador, não um objetivo ou resultado-chave.",
+        "Moonshot é aquela meta ousada, quase inatingível.",
+        "Metas tradicionais quase nunca focam em impacto transformador.",
+        "OKRs geralmente são mensais ou trimestrais para garantir adaptação.",
+        "OKRs focam em impacto, foco e adaptação, essenciais em ambientes ágeis."
+    ]
+    dicas = [
+        "🔎 Dica: Objetivos claros e mensuráveis são fundamentais.",
+        "💡 Ambição e transformação são palavras-chave dos OKRs.",
+        "📊 KPI monitora o que já acontece, OKR direciona mudança.",
+        "🚀 Inspire sua equipe com objetivos motivadores!",
+        "🎯 Mais que 5 KRs por objetivo? Pode perder o foco!",
+        "📉 KPI mede algo fixo, OKR impulsiona uma direção.",
+        "🌕 Moonshot = pensar grande sem medo de errar.",
+        "⚠️ Metas tradicionais: pouca mudança, pouca inovação.",
+        "⏳ Frequência curta facilita ajustes rápidos.",
+        "🌀 OKRs são mais dinâmicos e adaptáveis!"
+    ]
+
+    respostas_usuario = []
+    score = 0
     for i, (pergunta, correta, opcoes) in enumerate(perguntas):
         escolha = st.radio(f"{i+1}. {pergunta}", opcoes, key=f"q{i}")
-        respostas.append((escolha, correta))
+        respostas_usuario.append(escolha)
         if escolha == correta:
             score += 1
 
     if st.button("Enviar respostas"):
-        data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        df = pd.DataFrame([[email, score, data]], columns=["email", "pontuacao", "data"])
-     
+        st.markdown("---")
+        st.markdown(f"**Pontuação final:** {score}/10")
+        st.markdown("---")
+        st.subheader("Feedback detalhado:")
 
-        st.success(f"✅ Você acertou {score} de 10 perguntas!")
+        for i, (escolha, (_, correta, _)) in enumerate(zip(respostas_usuario, perguntas), 1):
+            if escolha == correta:
+                st.markdown(f"""✅  
+{i}. Correta! {justificativas[i-1]}  
+✔️ Muito bem!""")
+            else:
+                st.markdown(f"""❌  
+{i}. Incorreta. Sua resposta: {escolha}  
+Resposta correta: {correta}  
+Justificativa: {justificativas[i-1]}  
+{dicas[i-1]}""")
+
+        st.markdown("---")
         if score == 10:
             st.balloons()
+            st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
         elif score >= 7:
             st.info("🎉 Muito bem! Você compreende bem os fundamentos dos OKRs.")
         elif score >= 4:
             st.warning("🧐 Você está no caminho certo, mas vale revisar alguns conceitos.")
         else:
             st.error("🚨 É recomendável revisar os conceitos fundamentais de OKRs.")
-
-        corpo = f"Olá! Você concluiu o Quiz OKR com {score}/10 acertos. Obrigado por participar!"
-       
-
-     
-
