@@ -4,7 +4,7 @@ st.set_page_config(page_title="🧠 Quiz OKRs - Governança", page_icon="🧠", 
 st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs")
 st.subheader("Objetivo: Refletir sobre a importância do acompanhamento, governança e papel da área de dados.")
 
-# Gabarito, justificativa e dicas
+# Gabarito, justificativas e dicas
 respostas = [
     "b) Acompanhamento e ciclos de feedback contínuos",
     "c) Fornecer dados confiáveis e gerar insights estratégicos",
@@ -42,7 +42,6 @@ dicas = [
     "🎯 KRs são o termômetro do alcance dos objetivos."
 ]
 
-# Perguntas
 perguntas = [
     "1. A chave para o sucesso dos OKRs está em:",
     "2. O papel da área de dados nos OKRs é:",
@@ -55,7 +54,6 @@ perguntas = [
     "9. Qual o risco de criar metas conservadoras demais nos OKRs?",
     "10. Qual é o papel dos KRs na avaliação dos OKRs?"
 ]
-
 alternativas = [
     ["a) Ter KRs muito fáceis","b) Acompanhamento e ciclos de feedback contínuos","c) Não precisar de reuniões","d) Ser um documento fixo"],
     ["a) Criar gráficos bonitos","b) Ajudar na redação dos objetivos","c) Fornecer dados confiáveis e gerar insights estratégicos","d) Validar metas operacionais"],
@@ -96,6 +94,7 @@ Justificativa: {justificativa}
 
     st.markdown("---")
     if acertos == 10:
+        st.balloons()
         st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
     elif acertos >= 7:
         st.info("🥇 Excelente! Você já domina o tema!")
