@@ -141,40 +141,22 @@ for p in perguntas:
     opcoes = shift_correct_option(opcoes, p['correta'])
     p['opcoes_embaralhadas'] = opcoes
 
-# Salvando respostas em session_state para persistência
-if 'respostas_usuario' not in st.session_state:
-    st.session_state['respostas_usuario'] = [None]*10
-
-def update_resposta(idx, escolha):
-    st.session_state['respostas_usuario'][idx] = escolha
-
-# Exibe as perguntas e guarda as respostas
+respostas_usuario = []
 for i, p in enumerate(perguntas):
-    st.radio(
-        f"{i+1}. {p['pergunta']}", 
-        p['opcoes_embaralhadas'], 
-        key=f"q4_{i}",
-        on_change=update_resposta, 
-        args=(i, st.session_state.get(f"q4_{i}"))
-    )
+    resposta = st.radio(f"{i+1}. {p['pergunta']}", p['opcoes_embaralhadas'], key=f"q4_{i}")
+    respostas_usuario.append(resposta)
 
-todas_respondidas = all(st.session_state['respostas_usuario'])
-score = 0
-for i, p in enumerate(perguntas):
-    if st.session_state['respostas_usuario'][i] == p['correta']:
-        score += 1
-
-if not todas_respondidas:
-    st.info("Responda todas as perguntas para enviar o quiz.")
+todas_respondidas = all([r is not None for r in respostas_usuario])
 
 if todas_respondidas:
     if st.button("Enviar respostas"):
+        score = sum([escolha == p['correta'] for escolha, p in zip(respostas_usuario, perguntas)])
         st.markdown("---")
         st.markdown(f"**Pontuação final:** {score}/10")
         st.markdown("---")
         if score >= 7:
             st.subheader("Feedback detalhado:")
-            for i, (escolha, p) in enumerate(zip(st.session_state['respostas_usuario'], perguntas), 1):
+            for i, (escolha, p) in enumerate(zip(respostas_usuario, perguntas), 1):
                 if escolha == p['correta']:
                     st.markdown(f"""✅  
 {i}. Correta! {p['justificativa']}  
@@ -193,3 +175,5 @@ Justificativa: {p['justificativa']}
                 st.info("🎉 Muito bem! Você está aplicando os conceitos de OKRs em situações reais.")
         else:
             st.warning("Você acertou menos de 7. Tente novamente para ver o feedback detalhado!")
+else:
+    st.info("Responda todas as perguntas para enviar o quiz.")
