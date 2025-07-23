@@ -2,18 +2,17 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# Configuração
+# Configuração da página
 st.set_page_config(page_title="🎯 Quiz OKRs", page_icon="🎯", layout="centered")
-
-# Cabeçalho
 st.title("🎯 Quiz 1 – Fundamentos dos OKRs")
 st.markdown("Objetivo: Avaliar a compreensão dos conceitos principais de OKRs e suas diferenças com KPIs.")
+
 email = st.text_input("Digite seu e-mail para começar:", key="email")
 
 if email and st.button("Iniciar Quiz"):
-    st.session_state['quiz_iniciado'] = True
+    st.session_state['quiz1_iniciado'] = True
 
-if st.session_state.get("quiz_iniciado"):
+if st.session_state.get("quiz1_iniciado"):
     perguntas = [
         # (PERGUNTA, RESPOSTA_CORRETA, [OPCOES])
         ("O que significa a sigla OKR?", "c) Objectives and Key Results", [
@@ -78,36 +77,36 @@ if st.session_state.get("quiz_iniciado"):
         ])
     ]
 
-    # Justificativas e dicas por questão (adicione suas próprias se quiser)
+    # Justificativas e dicas por questão
     justificativas = [
         "OKR significa Objectives and Key Results, ou seja, Objetivos e Resultados-Chave.",
         "OKRs são ambiciosos e buscam transformação real, não apenas manutenção.",
-        "KPIs olham o presente; OKRs mostram para onde ir.",
-        "Um bom objetivo deve inspirar e desafiar.",
-        "O ideal é ter de 2 a 5 KRs por objetivo para manter o foco.",
-        "Churn Rate é um indicador, não um objetivo ou resultado-chave.",
-        "Moonshot é aquela meta ousada, quase inatingível.",
-        "Metas tradicionais quase nunca focam em impacto transformador.",
-        "OKRs geralmente são mensais ou trimestrais para garantir adaptação.",
-        "OKRs focam em impacto, foco e adaptação, essenciais em ambientes ágeis."
+        "KPIs olham para o presente; OKRs mostram para onde a empresa quer ir.",
+        "Um bom objetivo de OKR deve ser inspirador e desafiar o time.",
+        "O ideal é ter de 2 a 5 KRs por objetivo para manter o foco e a clareza.",
+        "Churn Rate é um indicador de negócio (KPI), não um objetivo nem um resultado-chave.",
+        "Moonshot é aquela meta ousada, quase inatingível, que incentiva a inovação.",
+        "Metas tradicionais raramente focam em impacto e transformação, são conservadoras.",
+        "Ciclos mais curtos, como mensal ou trimestral, favorecem adaptação contínua.",
+        "OKRs promovem foco, adaptação rápida e resultados de impacto em ambientes ágeis."
     ]
     dicas = [
-        "🔎 Dica: Objetivos claros e mensuráveis são fundamentais.",
-        "💡 Ambição e transformação são palavras-chave dos OKRs.",
-        "📊 KPI monitora o que já acontece, OKR direciona mudança.",
-        "🚀 Inspire sua equipe com objetivos motivadores!",
-        "🎯 Mais que 5 KRs por objetivo? Pode perder o foco!",
-        "📉 KPI mede algo fixo, OKR impulsiona uma direção.",
-        "🌕 Moonshot = pensar grande sem medo de errar.",
-        "⚠️ Metas tradicionais: pouca mudança, pouca inovação.",
-        "⏳ Frequência curta facilita ajustes rápidos.",
-        "🌀 OKRs são mais dinâmicos e adaptáveis!"
+        "🔎 Dica: O segredo do OKR está em mensurar o que realmente importa.",
+        "💡 Ambição e transformação andam junto com OKR.",
+        "📊 KPI monitora desempenho, OKR direciona a mudança.",
+        "🚀 Objetivos inspiradores movem pessoas!",
+        "🎯 Muitos KRs diluem o foco. Mantenha entre 2 e 5.",
+        "📉 KPI = métrica; OKR = direção e transformação.",
+        "🌕 Moonshot: pense grande, erre rápido, aprenda rápido.",
+        "⚠️ Metas tradicionais quase sempre buscam manter o status quo.",
+        "⏳ Frequência curta facilita ajustes e evolução.",
+        "🌀 OKRs favorecem times adaptáveis e protagonistas!"
     ]
 
     respostas_usuario = []
     score = 0
     for i, (pergunta, correta, opcoes) in enumerate(perguntas):
-        escolha = st.radio(f"{i+1}. {pergunta}", opcoes, key=f"q{i}")
+        escolha = st.radio(f"{i+1}. {pergunta}", opcoes, key=f"q1_{i}")
         respostas_usuario.append(escolha)
         if escolha == correta:
             score += 1
