@@ -83,7 +83,7 @@ if st.session_state.get("quiz1_iniciado"):
         "OKRs são ambiciosos e buscam transformação real, não apenas manutenção.",
         "KPIs olham para o presente; OKRs mostram para onde a empresa quer ir.",
         "Um bom objetivo de OKR deve ser inspirador e desafiar o time.",
-        "O ideal é ter de 2 a 5 KRs por objetivo para manter o foco e a clareza.",
+        "O ideal é ter de 3 a 5 KRs por objetivo para manter o foco e a clareza.",
         "Churn Rate é um indicador de negócio (KPI), não um objetivo nem um resultado-chave.",
         "Moonshot é aquela meta ousada, quase inatingível, que incentiva a inovação.",
         "Metas tradicionais raramente focam em impacto e transformação, são conservadoras.",
