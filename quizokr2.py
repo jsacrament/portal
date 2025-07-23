@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 st.set_page_config(page_title="🧩 Quiz OKRs no BI", page_icon="🧩", layout="centered")
 
@@ -54,39 +55,56 @@ dicas = [
     "🔎 OKRs práticos aceleram aprendizado real!"
 ]
 
-respostas_usuario = []
-score = 0
+# Função para nunca deixar a certa na posição A
+def shift_correct_option(opcoes, correta):
+    idx = opcoes.index(correta)
+    if idx == 0:
+        opcoes[0], opcoes[1] = opcoes[1], opcoes[0]
+    return opcoes
+
+random.seed(123)
+alternativas_embaralhadas = []
+respostas_certas = []
 for i, (pergunta, correta, opcoes) in enumerate(perguntas):
-    escolha = st.radio(f"{i+1}. {pergunta}", opcoes, key=f"q2_{i}")
-    respostas_usuario.append(escolha)
-    if escolha == correta:
-        score += 1
+    alt = opcoes[:]
+    random.shuffle(alt)
+    alt = shift_correct_option(alt, correta)
+    alternativas_embaralhadas.append(alt)
+    respostas_certas.append(correta)
 
-if st.button("Enviar respostas"):
-    st.markdown("---")
-    st.markdown(f"**Pontuação final:** {score}/10")
-    st.markdown("---")
-    st.subheader("Feedback detalhado:")
+respostas_usuario = []
+for i, (pergunta, opcs) in enumerate(zip([p[0] for p in perguntas], alternativas_embaralhadas)):
+    resposta = st.radio(f"{i+1}. {pergunta}", opcs, key=f"q2_{i}")
+    respostas_usuario.append(resposta)
 
-    for i, (escolha, (_, correta, _)) in enumerate(zip(respostas_usuario, perguntas), 1):
-        if escolha == correta:
-            st.markdown(f"""✅  
-{i}. Correta! {justificativas[i-1]}  
+todas_respondidas = all([r is not None for r in respostas_usuario])
+
+if todas_respondidas:
+    if st.button("Enviar respostas"):
+        score = sum([resp == correta for resp, correta in zip(respostas_usuario, respostas_certas)])
+        st.markdown("---")
+        st.markdown(f"**Pontuação final:** {score}/10")
+        st.markdown("---")
+        if score >= 7:
+            st.subheader("Feedback detalhado:")
+            for i, (escolha, correta) in enumerate(zip(respostas_usuario, respostas_certas)):
+                if escolha == correta:
+                    st.markdown(f"""✅  
+{i+1}. Correta! {justificativas[i]}  
 ✔️ Muito bem!""")
-        else:
-            st.markdown(f"""❌  
-{i}. Incorreta. Sua resposta: {escolha}  
+                else:
+                    st.markdown(f"""❌  
+{i+1}. Incorreta. Sua resposta: {escolha}  
 Resposta correta: {correta}  
-Justificativa: {justificativas[i-1]}  
-{dicas[i-1]}""")
-
-    st.markdown("---")
-    if score == 10:
-        st.balloons()
-        st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
-    elif score >= 7:
-        st.info("🎉 Muito bem! Você está aplicando bem os conceitos de OKRs no BI.")
-    elif score >= 4:
-        st.warning("🧐 Quase lá! Reforce os conceitos e tente novamente.")
-    else:
-        st.error("🚨 Hora de revisar os fundamentos e práticas de OKRs no BI.")
+Justificativa: {justificativas[i]}  
+{dicas[i]}""")
+            st.markdown("---")
+            if score == 10:
+                st.balloons()
+                st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
+            elif score >= 7:
+                st.info("🎉 Muito bem! Você está aplicando bem os conceitos de OKRs no BI.")
+        else:
+            st.warning("Você acertou menos de 7. Tente novamente para ver o feedback detalhado!")
+else:
+    st.info("Responda todas as perguntas para enviar o quiz.")
