@@ -39,10 +39,10 @@ if st.session_state.get("quiz1_iniciado"):
             "c) Baseado em backlog",
             "d) Específico e conservador"
         ]),
-        ("Qual é a quantidade ideal de Resultados-Chave (KRs) por Objetivo?", "c) 2 a 5", [
+        ("Qual é a quantidade ideal de Resultados-Chave (KRs) por Objetivo?", "c) 3 a 5", [
             "a) 1",
             "b) 10",
-            "c) 2 a 5",
+            "c) 3 a 5",
             "d) Quantos forem possíveis"
         ]),
         ("Qual exemplo abaixo é um KPI e não um OKR?", "c) Churn Rate", [
