@@ -1,10 +1,10 @@
 import streamlit as st
 
 st.set_page_config(page_title="🧠 Quiz OKRs - Governança", page_icon="🧠", layout="centered")
-st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs1")
+st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs")
 st.subheader("Objetivo: Refletir sobre a importância do acompanhamento, governança e papel da área de dados.")
 
-# Respostas corretas e justificativas
+# Gabarito, justificativa e dicas
 respostas = [
     "b) Acompanhamento e ciclos de feedback contínuos",
     "c) Fornecer dados confiáveis e gerar insights estratégicos",
@@ -17,7 +17,6 @@ respostas = [
     "c) Falta de transformação real",
     "b) Medir se o objetivo foi alcançado"
 ]
-
 justificativas = [
     "O acompanhamento constante e ciclos de feedback permitem ajustes e engajamento ao longo do ciclo dos OKRs.",
     "O papel da área de dados é fornecer informações confiáveis e gerar insights estratégicos para orientar decisões.",
@@ -30,7 +29,6 @@ justificativas = [
     "Metas muito conservadoras dificultam transformação e inovação real na organização.",
     "Os KRs existem para medir de forma objetiva se o objetivo foi alcançado."
 ]
-
 dicas = [
     "🔎 Dica: Sempre mantenha ciclos de feedback ativos para evoluir os OKRs.",
     "💡 Curiosidade: Dados confiáveis = decisões mais inteligentes!",
@@ -43,9 +41,6 @@ dicas = [
     "🚀 Metas ousadas promovem a verdadeira transformação.",
     "🎯 KRs são o termômetro do alcance dos objetivos."
 ]
-
-score = 0
-respostas_usuario = []
 
 # Perguntas
 perguntas = [
@@ -74,46 +69,37 @@ alternativas = [
     ["a) Fazer revisões ortográficas","b) Medir se o objetivo foi alcançado","c) Substituir objetivos","d) Justificar falhas"]
 ]
 
-# Captura as respostas
+respostas_usuario = []
 for i, (pergunta, opcoes) in enumerate(zip(perguntas, alternativas)):
     respostas_usuario.append(
         st.radio(f"{pergunta}", opcoes, key=f"q{i}")
     )
 
 if st.button("Enviar respostas"):
-    score = sum([ru == r for ru, r in zip(respostas_usuario, respostas)])
+    acertos = sum([ru == r for ru, r in zip(respostas_usuario, respostas)])
     st.markdown("---")
-
-    # Badge e frase personalizada
-    if score == 10:
-        st.balloons()
-        st.markdown("<h3 style='color:green;'>🏆 Parabéns, você gabaritou! Mestre dos OKRs!</h3>", unsafe_allow_html=True)
-        st.image("https://media.giphy.com/media/111ebonMs90YLu/giphy.gif", width=250)
-    elif score >= 7:
-        st.markdown("<h4 style='color:#1976D2;'>🥇 Excelente! Você já domina o tema!</h4>", unsafe_allow_html=True)
-        st.image("https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", width=220)
-    elif score >= 4:
-        st.markdown("<h4 style='color:orange;'>🥉 Bom! Você está no caminho, mas pode revisar alguns pontos.</h4>", unsafe_allow_html=True)
-    else:
-        st.markdown("<h4 style='color:red;'>💡 Que tal revisar e tentar de novo?</h4>", unsafe_allow_html=True)
-
-    st.markdown(f"**Pontuação:** <span style='color:#1976D2;font-size:22px'><b>{score}/10</b></span>", unsafe_allow_html=True)
+    st.markdown(f"**Pontuação final:** {acertos}/10")
     st.markdown("---")
-    st.subheader("Seu feedback em cada questão:")
+    st.subheader("Feedback detalhado:")
 
     for i, (resp, correta, justificativa, dica) in enumerate(zip(respostas_usuario, respostas, justificativas, dicas), 1):
         if resp == correta:
-            st.success(f"**{i}. Correta!** {justificativa} <br><span style='color:green;font-size:16px;'>✔️ Muito bem!</span>", icon="✅")
+            st.markdown(f"""✅  
+{i}. Correta! {justificativa}  
+✔️ Muito bem!""")
         else:
-            st.error(
-                f"**{i}. Incorreta.** Sua resposta: <b>{resp}</b><br>"
-                f"Resposta correta: <b>{correta}</b><br>"
-                f"<b>Justificativa:</b> {justificativa}<br>"
-                f"<span style='color:orange'><b>{dica}</b></span>",
-                icon="❌"
-            )
+            st.markdown(f"""❌  
+{i}. Incorreta. Sua resposta: {resp}  
+Resposta correta: {correta}  
+Justificativa: {justificativa}  
+{dica}""")
 
-    st.info(f"Total de acertos: {score}/10", icon="📊")
     st.markdown("---")
-    st.markdown("Quer aprender mais? Refaça o quiz para aprimorar seu conhecimento! 😉")
-
+    if acertos == 10:
+        st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
+    elif acertos >= 7:
+        st.info("🥇 Excelente! Você já domina o tema!")
+    elif acertos >= 4:
+        st.warning("🥉 Bom! Você está no caminho, mas pode revisar alguns pontos.")
+    else:
+        st.error("💡 Que tal revisar e tentar de novo?")
