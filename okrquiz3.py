@@ -1,25 +1,10 @@
 import streamlit as st
 
 st.set_page_config(page_title="🧠 Quiz OKRs - Governança", page_icon="🧠", layout="centered")
-st.markdown("""
-    <style>
-        .st-success {background-color: #e6ffe6;}
-        .st-error {background-color: #fff0f0;}
-        .badge {
-            display: inline-block;
-            padding: 0.3em 0.7em;
-            border-radius: 12px;
-            font-size: 0.8em;
-            background: #FFDE59;
-            color: #333;
-            margin-left: 6px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs")
+st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs1")
 st.subheader("Objetivo: Refletir sobre a importância do acompanhamento, governança e papel da área de dados.")
 
+# Respostas corretas e justificativas
 respostas = [
     "b) Acompanhamento e ciclos de feedback contínuos",
     "c) Fornecer dados confiáveis e gerar insights estratégicos",
@@ -34,36 +19,35 @@ respostas = [
 ]
 
 justificativas = [
-    "✅ O acompanhamento constante e ciclos de feedback permitem ajustes e engajamento ao longo do ciclo dos OKRs.",
-    "✅ O papel da área de dados é fornecer informações confiáveis e gerar insights estratégicos para orientar decisões.",
-    "✅ Governança eficiente requer acompanhamento contínuo e comunicação aberta com todos os envolvidos.",
-    "❌ Metas isoladas da estratégia dificultam o alinhamento organizacional e reduzem o impacto dos OKRs.",
-    "✅ Monitoramento coletivo, transparente e frequente garante engajamento e resultados efetivos.",
-    "✅ OKRs devem ser flexíveis, permitindo ajustes e aprendizados ao longo do tempo.",
-    "✅ KPIs ajudam a validar os resultados dos OKRs, servindo como métricas objetivas.",
-    "✅ Painéis de BI facilitam o acompanhamento visual, frequente e compartilhado dos OKRs.",
-    "❌ Metas muito conservadoras dificultam transformação e inovação real na organização.",
-    "✅ Os KRs existem para medir de forma objetiva se o objetivo foi alcançado."
+    "O acompanhamento constante e ciclos de feedback permitem ajustes e engajamento ao longo do ciclo dos OKRs.",
+    "O papel da área de dados é fornecer informações confiáveis e gerar insights estratégicos para orientar decisões.",
+    "Governança eficiente requer acompanhamento contínuo e comunicação aberta com todos os envolvidos.",
+    "Metas isoladas da estratégia dificultam o alinhamento organizacional e reduzem o impacto dos OKRs.",
+    "Monitoramento coletivo, transparente e frequente garante engajamento e resultados efetivos.",
+    "OKRs devem ser flexíveis, permitindo ajustes e aprendizados ao longo do tempo.",
+    "KPIs ajudam a validar os resultados dos OKRs, servindo como métricas objetivas.",
+    "Painéis de BI facilitam o acompanhamento visual, frequente e compartilhado dos OKRs.",
+    "Metas muito conservadoras dificultam transformação e inovação real na organização.",
+    "Os KRs existem para medir de forma objetiva se o objetivo foi alcançado."
 ]
 
 dicas = [
-    "Dica: Busque sempre ciclos de feedback rápidos nos seus OKRs!",
-    "Fun fact: Dados bem utilizados aumentam o impacto dos OKRs.",
-    "Governança é mais forte quando é coletiva e transparente.",
-    "Lembre-se: Alinhar OKRs com a estratégia é essencial.",
-    "Engajamento coletivo = melhores resultados!",
-    "OKRs engessados não acompanham o ritmo das empresas inovadoras.",
-    "KPIs e OKRs juntos são imparáveis.",
-    "Ferramentas visuais tornam o progresso mais tangível.",
-    "Desafie sua equipe: metas ousadas promovem inovação.",
-    "Sempre meça o que importa. 😉"
+    "🔎 Dica: Sempre mantenha ciclos de feedback ativos para evoluir os OKRs.",
+    "💡 Curiosidade: Dados confiáveis = decisões mais inteligentes!",
+    "👥 Comunicação e acompanhamento são o coração da governança.",
+    "⚠️ Armadilha: Alinhe OKRs à estratégia para gerar impacto real.",
+    "🙌 Monitoramento coletivo cria mais engajamento.",
+    "♻️ Adaptar OKRs ao aprendizado traz resultados mais reais.",
+    "📊 Use KPIs para validar, não para competir com seus OKRs.",
+    "🖥️ Ferramentas visuais tornam o acompanhamento mais simples.",
+    "🚀 Metas ousadas promovem a verdadeira transformação.",
+    "🎯 KRs são o termômetro do alcance dos objetivos."
 ]
 
 score = 0
 respostas_usuario = []
 
-# Perguntas e barra de progresso
-progress = st.progress(0)
+# Perguntas
 perguntas = [
     "1. A chave para o sucesso dos OKRs está em:",
     "2. O papel da área de dados nos OKRs é:",
@@ -90,54 +74,46 @@ alternativas = [
     ["a) Fazer revisões ortográficas","b) Medir se o objetivo foi alcançado","c) Substituir objetivos","d) Justificar falhas"]
 ]
 
+# Captura as respostas
 for i, (pergunta, opcoes) in enumerate(zip(perguntas, alternativas)):
     respostas_usuario.append(
         st.radio(f"{pergunta}", opcoes, key=f"q{i}")
     )
-    progress.progress((i+1)/len(perguntas))
 
 if st.button("Enviar respostas"):
-    st.balloons()
-    st.success(f"🎯 Sua pontuação: {sum([ru==r for ru,r in zip(respostas_usuario,respostas)])} de 10 perguntas.")
-    badges = ""
-    acertos = sum([ru==r for ru,r in zip(respostas_usuario,respostas)])
-    # Badges personalizados
-    if acertos == 10:
-        badges += "🏆 <span class='badge'>Gabaritou!</span>"
-    elif acertos >= 7:
-        badges += "🥇 <span class='badge'>Especialista</span>"
-    elif acertos >= 4:
-        badges += "🥉 <span class='badge'>Aprendiz</span>"
-    else:
-        badges += "💡 <span class='badge'>Recomeçar</span>"
-    st.markdown(f"**Seu status:** {badges}", unsafe_allow_html=True)
+    score = sum([ru == r for ru, r in zip(respostas_usuario, respostas)])
     st.markdown("---")
-    st.subheader("Feedback por questão:")
+
+    # Badge e frase personalizada
+    if score == 10:
+        st.balloons()
+        st.markdown("<h3 style='color:green;'>🏆 Parabéns, você gabaritou! Mestre dos OKRs!</h3>", unsafe_allow_html=True)
+        st.image("https://media.giphy.com/media/111ebonMs90YLu/giphy.gif", width=250)
+    elif score >= 7:
+        st.markdown("<h4 style='color:#1976D2;'>🥇 Excelente! Você já domina o tema!</h4>", unsafe_allow_html=True)
+        st.image("https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", width=220)
+    elif score >= 4:
+        st.markdown("<h4 style='color:orange;'>🥉 Bom! Você está no caminho, mas pode revisar alguns pontos.</h4>", unsafe_allow_html=True)
+    else:
+        st.markdown("<h4 style='color:red;'>💡 Que tal revisar e tentar de novo?</h4>", unsafe_allow_html=True)
+
+    st.markdown(f"**Pontuação:** <span style='color:#1976D2;font-size:22px'><b>{score}/10</b></span>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.subheader("Seu feedback em cada questão:")
 
     for i, (resp, correta, justificativa, dica) in enumerate(zip(respostas_usuario, respostas, justificativas, dicas), 1):
         if resp == correta:
-            st.success(
-                f"**{i}. Correta!** {justificativa} <br>"
-                f"<span style='color:green'>✔️ Parabéns! Você acertou.</span>", 
-                icon="✅", 
-                unsafe_allow_html=True
-            )
+            st.success(f"**{i}. Correta!** {justificativa} <br><span style='color:green;font-size:16px;'>✔️ Muito bem!</span>", icon="✅")
         else:
             st.error(
-                f"**{i}. Incorreta.** <br>"
-                f"Sua resposta: <b>{resp}</b><br>Resposta correta: <b>{correta}</b><br>"
-                f"{justificativa} <br>"
-                f"<span style='color:orange'>{dica}</span>", 
-                icon="❌",
-                unsafe_allow_html=True
+                f"**{i}. Incorreta.** Sua resposta: <b>{resp}</b><br>"
+                f"Resposta correta: <b>{correta}</b><br>"
+                f"<b>Justificativa:</b> {justificativa}<br>"
+                f"<span style='color:orange'><b>{dica}</b></span>",
+                icon="❌"
             )
-    st.info(f"Total de acertos: {acertos}/10", icon="📊")
-    if acertos == 10:
-        st.success("Uau! Você merece o título de Mestre dos OKRs! 🚀")
-    elif acertos >= 7:
-        st.info("Mandou bem! Seu domínio de OKRs está acima da média. Continue assim! 👏")
-    elif acertos >= 4:
-        st.warning("Você já tem uma boa base, mas vale revisar os pontos das respostas erradas. Siga praticando!")
-    else:
-        st.error("Que tal estudar um pouco mais sobre governança e OKRs e tentar novamente? 💪")
+
+    st.info(f"Total de acertos: {score}/10", icon="📊")
+    st.markdown("---")
+    st.markdown("Quer aprender mais? Refaça o quiz para aprimorar seu conhecimento! 😉")
 
