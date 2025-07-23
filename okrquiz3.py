@@ -1,11 +1,11 @@
 import streamlit as st
+import random
 
 st.set_page_config(page_title="🧠 Quiz OKRs - Governança", page_icon="🧠", layout="centered")
 st.title("🧠 Quiz 3 – Monitoramento e Governança dos OKRs")
 st.subheader("Objetivo: Refletir sobre a importância do acompanhamento, governança e papel da área de dados.")
 
-# Gabarito, justificativas e dicas
-respostas = [
+respostas_certas = [
     "b) Acompanhamento e ciclos de feedback contínuos",
     "c) Fornecer dados confiáveis e gerar insights estratégicos",
     "d) Fazer acompanhamento constante e comunicação",
@@ -43,16 +43,16 @@ dicas = [
 ]
 
 perguntas = [
-    "1. A chave para o sucesso dos OKRs está em:",
-    "2. O papel da área de dados nos OKRs é:",
-    "3. Uma boa prática de governança de OKRs inclui:",
-    "4. O que é considerado uma armadilha na aplicação de OKRs?",
-    "5. O monitoramento eficaz deve ser:",
-    "6. OKRs funcionam melhor quando:",
-    "7. Como os KPIs e OKRs se complementam?",
-    "8. Qual destas ferramentas é fundamental para monitorar OKRs?",
-    "9. Qual o risco de criar metas conservadoras demais nos OKRs?",
-    "10. Qual é o papel dos KRs na avaliação dos OKRs?"
+    "A chave para o sucesso dos OKRs está em:",
+    "O papel da área de dados nos OKRs é:",
+    "Uma boa prática de governança de OKRs inclui:",
+    "O que é considerado uma armadilha na aplicação de OKRs?",
+    "O monitoramento eficaz deve ser:",
+    "OKRs funcionam melhor quando:",
+    "Como os KPIs e OKRs se complementam?",
+    "Qual destas ferramentas é fundamental para monitorar OKRs?",
+    "Qual o risco de criar metas conservadoras demais nos OKRs?",
+    "Qual é o papel dos KRs na avaliação dos OKRs?"
 ]
 alternativas = [
     ["a) Ter KRs muito fáceis","b) Acompanhamento e ciclos de feedback contínuos","c) Não precisar de reuniões","d) Ser um documento fixo"],
@@ -67,38 +67,54 @@ alternativas = [
     ["a) Fazer revisões ortográficas","b) Medir se o objetivo foi alcançado","c) Substituir objetivos","d) Justificar falhas"]
 ]
 
+# Embaralhar opções, mas nunca deixar a resposta certa na posição A
+def shift_correct_option(opcoes, correta):
+    idx = opcoes.index(correta)
+    if idx == 0:
+        opcoes[0], opcoes[1] = opcoes[1], opcoes[0]
+    return opcoes
+
+random.seed(2024)
+alternativas_embaralhadas = []
+for i, opcoes in enumerate(alternativas):
+    alt = opcoes[:]
+    random.shuffle(alt)
+    alt = shift_correct_option(alt, respostas_certas[i])
+    alternativas_embaralhadas.append(alt)
+
 respostas_usuario = []
-for i, (pergunta, opcoes) in enumerate(zip(perguntas, alternativas)):
-    respostas_usuario.append(
-        st.radio(f"{pergunta}", opcoes, key=f"q{i}")
-    )
+for i, (pergunta, opcs) in enumerate(zip(perguntas, alternativas_embaralhadas)):
+    resposta = st.radio(f"{i+1}. {pergunta}", opcs, key=f"q3_{i}")
+    respostas_usuario.append(resposta)
 
-if st.button("Enviar respostas"):
-    acertos = sum([ru == r for ru, r in zip(respostas_usuario, respostas)])
-    st.markdown("---")
-    st.markdown(f"**Pontuação final:** {acertos}/10")
-    st.markdown("---")
-    st.subheader("Feedback detalhado:")
+todas_respondidas = all([r is not None for r in respostas_usuario])
 
-    for i, (resp, correta, justificativa, dica) in enumerate(zip(respostas_usuario, respostas, justificativas, dicas), 1):
-        if resp == correta:
-            st.markdown(f"""✅  
+if todas_respondidas:
+    if st.button("Enviar respostas"):
+        acertos = sum([resp == correta for resp, correta in zip(respostas_usuario, respostas_certas)])
+        st.markdown("---")
+        st.markdown(f"**Pontuação final:** {acertos}/10")
+        st.markdown("---")
+        if acertos >= 7:
+            st.subheader("Feedback detalhado:")
+            for i, (resp, correta, justificativa, dica) in enumerate(zip(respostas_usuario, respostas_certas, justificativas, dicas), 1):
+                if resp == correta:
+                    st.markdown(f"""✅  
 {i}. Correta! {justificativa}  
 ✔️ Muito bem!""")
-        else:
-            st.markdown(f"""❌  
+                else:
+                    st.markdown(f"""❌  
 {i}. Incorreta. Sua resposta: {resp}  
 Resposta correta: {correta}  
 Justificativa: {justificativa}  
 {dica}""")
-
-    st.markdown("---")
-    if acertos == 10:
-        st.balloons()
-        st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
-    elif acertos >= 7:
-        st.info("🥇 Excelente! Você já domina o tema!")
-    elif acertos >= 4:
-        st.warning("🥉 Bom! Você está no caminho, mas pode revisar alguns pontos.")
-    else:
-        st.error("💡 Que tal revisar e tentar de novo?")
+            st.markdown("---")
+            if acertos == 10:
+                st.balloons()
+                st.success("🏆 Parabéns, você gabaritou! Mestre dos OKRs!")
+            elif acertos >= 7:
+                st.info("🥇 Excelente! Você já domina o tema!")
+        else:
+            st.warning("Você acertou menos de 7. Tente novamente para ver o feedback detalhado!")
+else:
+    st.info("Responda todas as perguntas para enviar o quiz.")
