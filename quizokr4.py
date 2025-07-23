@@ -1,115 +1,159 @@
 import streamlit as st
+import random
 
 st.set_page_config(page_title="🚀 Quiz Prático de OKRs", page_icon="🚀", layout="centered")
 
 st.title("🚀 Quiz 4 – OKRs na Prática: Casos Reais e Decisões")
 st.subheader("Objetivo: Avaliar a aplicação de OKRs em contextos operacionais e tomada de decisão.")
 
+# Perguntas com resposta certa SEMPRE fora da posição A (embaralhamento controlado)
 perguntas = [
-    ("Você é líder de BI e quer aumentar o uso de dashboards na operação. Qual KR seria mais adequado?", 
-     "b) Aumentar o uso ativo dos dashboards de 40% para 80%", [
-        "a) Publicar novos relatórios diariamente",
-        "b) Aumentar o uso ativo dos dashboards de 40% para 80%",
-        "c) Criar uma nova base de dados",
-        "d) Treinar um estagiário de dados"
-    ]),
-    ("Sua equipe de dados demora 5 horas para atualizar os indicadores diários. Qual objetivo faria sentido?", 
-     "a) Reduzir o tempo de processamento do pipeline para 15 minutos", [
-        "a) Reduzir o tempo de processamento do pipeline para 15 minutos",
-        "b) Aumentar a satisfação da equipe de RH",
-        "c) Trocar de ferramenta de BI",
-        "d) Implementar um novo CRM"
-    ]),
-    ("Você tem 12 métricas em um único OKR. Qual armadilha você caiu?", 
-     "b) Excesso de indicadores", [
-        "a) Boa governança",
-        "b) Excesso de indicadores",
-        "c) Foco técnico",
-        "d) Estratégia top-down"
-    ]),
-    ("Um gestor quer que os analistas respondam chamados ad-hoc mesmo durante o ciclo de OKRs. O que você faz?", 
-     "b) Define prioridades no ciclo e negocia entregas", [
-        "a) Ignora os OKRs",
-        "b) Define prioridades no ciclo e negocia entregas",
-        "c) Cria mais dashboards para justificar",
-        "d) Faz tudo ao mesmo tempo"
-    ]),
-    ("Qual dessas alternativas representa uma métrica técnica que pode ser usada como KR?", 
-     "a) Tempo médio de atendimento (TMA)", [
-        "a) Tempo médio de atendimento (TMA)",
-        "b) Lucro líquido do trimestre",
-        "c) Número de campanhas de marketing",
-        "d) Salário médio da equipe"
-    ]),
-    ("Seu objetivo é 'Elevar a confiança nos dados para decisões operacionais'. Qual KR seria adequado?", 
-     "a) Aumentar cobertura de testes automatizados de 40% para 90%", [
-        "a) Aumentar cobertura de testes automatizados de 40% para 90%",
-        "b) Criar mais dashboards",
-        "c) Diminuir o backlog de chamados para metade",
-        "d) Reduzir o headcount da equipe"
-    ]),
-    ("Você precisa acompanhar o progresso dos OKRs semanalmente. Qual ferramenta usaria?", 
-     "a) Painel com status dos KRs", [
-        "a) Painel com status dos KRs",
-        "b) Relatório em papel",
-        "c) Tabela dinâmica no Excel",
-        "d) Apontamento em agenda pessoal"
-    ]),
-    ("Ao revisar os OKRs, a equipe percebe que atingiu 100% de todos os KRs facilmente. O que isso indica?", 
-     "b) Faltou ambição nos objetivos", [
-        "a) Excelente estratégia",
-        "b) Faltou ambição nos objetivos",
-        "c) Falha de comunicação",
-        "d) Métricas mal definidas"
-    ]),
-    ("Seu call center teve queda no NPS. Qual KR pode ajudar?", 
-     "a) Implementar 2 modelos preditivos para identificar causas do NPS", [
-        "a) Implementar 2 modelos preditivos para identificar causas do NPS",
-        "b) Reduzir o número de agentes",
-        "c) Automatizar relatórios",
-        "d) Trocar todos os líderes"
-    ]),
-    ("Qual papel é responsável por transformar dados brutos em insights estratégicos para os OKRs?", 
-     "c) Profissional de dados", [
-        "a) Analista de RH",
-        "b) Gestor Financeiro",
-        "c) Profissional de dados",
-        "d) Assistente de suporte"
-    ])
+    {
+        "pergunta": "Você é líder de BI e quer aumentar o uso de dashboards na operação. Qual KR seria mais adequado?",
+        "correta": "Aumentar o uso ativo dos dashboards de 40% para 80%",
+        "opcoes": [
+            "Publicar novos relatórios diariamente",
+            "Aumentar o uso ativo dos dashboards de 40% para 80%",
+            "Criar uma nova base de dados",
+            "Treinar um estagiário de dados"
+        ],
+        "justificativa": "O uso ativo mede se os dashboards realmente ajudam a operação e geram valor.",
+        "dica": "📊 Priorize sempre o uso e engajamento, não só entrega de relatório."
+    },
+    {
+        "pergunta": "Sua equipe de dados demora 5 horas para atualizar os indicadores diários. Qual objetivo faria sentido?",
+        "correta": "Reduzir o tempo de processamento do pipeline para 15 minutos",
+        "opcoes": [
+            "Aumentar a satisfação da equipe de RH",
+            "Reduzir o tempo de processamento do pipeline para 15 minutos",
+            "Trocar de ferramenta de BI",
+            "Implementar um novo CRM"
+        ],
+        "justificativa": "O objetivo foca em eficiência operacional, reduzindo tempo e custo.",
+        "dica": "⚡ Eficiência e agilidade são ótimos objetivos para equipes de dados."
+    },
+    {
+        "pergunta": "Você tem 12 métricas em um único OKR. Qual armadilha você caiu?",
+        "correta": "Excesso de indicadores",
+        "opcoes": [
+            "Foco técnico",
+            "Excesso de indicadores",
+            "Boa governança",
+            "Estratégia top-down"
+        ],
+        "justificativa": "Excesso de indicadores dispersa foco e dificulta a execução dos OKRs.",
+        "dica": "🔢 Menos é mais: limite seus KRs para garantir foco."
+    },
+    {
+        "pergunta": "Um gestor quer que os analistas respondam chamados ad-hoc mesmo durante o ciclo de OKRs. O que você faz?",
+        "correta": "Define prioridades no ciclo e negocia entregas",
+        "opcoes": [
+            "Ignora os OKRs",
+            "Cria mais dashboards para justificar",
+            "Define prioridades no ciclo e negocia entregas",
+            "Faz tudo ao mesmo tempo"
+        ],
+        "justificativa": "Priorizar e negociar entregas mantém o alinhamento ao que importa e evita sobrecarga.",
+        "dica": "🤝 Negociar prioridades é essencial para evitar retrabalho."
+    },
+    {
+        "pergunta": "Qual dessas alternativas representa uma métrica técnica que pode ser usada como KR?",
+        "correta": "Tempo médio de atendimento (TMA)",
+        "opcoes": [
+            "Número de campanhas de marketing",
+            "Salário médio da equipe",
+            "Lucro líquido do trimestre",
+            "Tempo médio de atendimento (TMA)"
+        ],
+        "justificativa": "TMA é uma métrica técnica útil para medir eficiência operacional.",
+        "dica": "🎯 KRs técnicos devem ser claros e ligados à operação."
+    },
+    {
+        "pergunta": "Seu objetivo é 'Elevar a confiança nos dados para decisões operacionais'. Qual KR seria adequado?",
+        "correta": "Aumentar cobertura de testes automatizados de 40% para 90%",
+        "opcoes": [
+            "Criar mais dashboards",
+            "Aumentar cobertura de testes automatizados de 40% para 90%",
+            "Diminuir o backlog de chamados para metade",
+            "Reduzir o headcount da equipe"
+        ],
+        "justificativa": "Cobertura de testes automatizados aumenta confiança e reduz riscos nos dados.",
+        "dica": "🛡️ Qualidade dos dados começa nos testes."
+    },
+    {
+        "pergunta": "Você precisa acompanhar o progresso dos OKRs semanalmente. Qual ferramenta usaria?",
+        "correta": "Painel com status dos KRs",
+        "opcoes": [
+            "Relatório em papel",
+            "Painel com status dos KRs",
+            "Tabela dinâmica no Excel",
+            "Apontamento em agenda pessoal"
+        ],
+        "justificativa": "Painéis de status facilitam acompanhamento e transparência dos resultados.",
+        "dica": "📈 Painéis visuais promovem acompanhamento coletivo."
+    },
+    {
+        "pergunta": "Ao revisar os OKRs, a equipe percebe que atingiu 100% de todos os KRs facilmente. O que isso indica?",
+        "correta": "Faltou ambição nos objetivos",
+        "opcoes": [
+            "Excelente estratégia",
+            "Falha de comunicação",
+            "Faltou ambição nos objetivos",
+            "Métricas mal definidas"
+        ],
+        "justificativa": "Facilidade em atingir todos os KRs geralmente mostra falta de desafio e ambição.",
+        "dica": "🚀 Busque sempre objetivos desafiadores, mas alcançáveis."
+    },
+    {
+        "pergunta": "Seu call center teve queda no NPS. Qual KR pode ajudar?",
+        "correta": "Implementar 2 modelos preditivos para identificar causas do NPS",
+        "opcoes": [
+            "Reduzir o número de agentes",
+            "Trocar todos os líderes",
+            "Automatizar relatórios",
+            "Implementar 2 modelos preditivos para identificar causas do NPS"
+        ],
+        "justificativa": "Modelos preditivos ajudam a identificar e atuar nas causas do NPS, gerando impacto real.",
+        "dica": "🔎 Diagnóstico de causa traz ações concretas para o NPS."
+    },
+    {
+        "pergunta": "Qual papel é responsável por transformar dados brutos em insights estratégicos para os OKRs?",
+        "correta": "Profissional de dados",
+        "opcoes": [
+            "Assistente de suporte",
+            "Profissional de dados",
+            "Gestor Financeiro",
+            "Analista de RH"
+        ],
+        "justificativa": "O profissional de dados converte informação em ação estratégica para os OKRs.",
+        "dica": "👩‍💻 Profissionais de dados são essenciais para gerar insights de valor."
+    }
 ]
 
-justificativas = [
-    "O uso ativo mede se os dashboards realmente ajudam a operação e geram valor.",
-    "O objetivo foca em eficiência operacional, reduzindo tempo e custo.",
-    "Excesso de indicadores dispersa foco e dificulta a execução dos OKRs.",
-    "Priorizar e negociar entregas mantém o alinhamento ao que importa e evita sobrecarga.",
-    "TMA é uma métrica técnica útil para medir eficiência operacional.",
-    "Cobertura de testes automatizados aumenta confiança e reduz riscos nos dados.",
-    "Painéis de status facilitam acompanhamento e transparência dos resultados.",
-    "Facilidade em atingir todos os KRs geralmente mostra falta de desafio e ambição.",
-    "Modelos preditivos ajudam a identificar e atuar nas causas do NPS, gerando impacto real.",
-    "O profissional de dados converte informação em ação estratégica para os OKRs."
-]
+# Função para garantir que a opção correta nunca é a primeira
+def shift_correct_option(opcoes, correta):
+    idx = opcoes.index(correta)
+    if idx == 0:
+        # Troca para posição 1 (B)
+        opcoes[0], opcoes[1] = opcoes[1], opcoes[0]
+    return opcoes
 
-dicas = [
-    "📊 Priorize sempre o uso e engajamento, não só entrega de relatório.",
-    "⚡ Eficiência e agilidade são ótimos objetivos para equipes de dados.",
-    "🔢 Menos é mais: limite seus KRs para garantir foco.",
-    "🤝 Negociar prioridades é essencial para evitar retrabalho.",
-    "🎯 KRs técnicos devem ser claros e ligados à operação.",
-    "🛡️ Qualidade dos dados começa nos testes.",
-    "📈 Painéis visuais promovem acompanhamento coletivo.",
-    "🚀 Busque sempre objetivos desafiadores, mas alcançáveis.",
-    "🔎 Diagnóstico de causa traz ações concretas para o NPS.",
-    "👩‍💻 Profissionais de dados são essenciais para gerar insights de valor."
-]
+# Montar perguntas embaralhando as alternativas (exceto nunca na posição 0/A)
+random.seed(42)  # Para reprodutibilidade, remova em produção se quiser total aleatoriedade
+
+for p in perguntas:
+    opcoes = p['opcoes'][:]
+    # Embaralha e reposiciona se correta caiu na posição 0
+    random.shuffle(opcoes)
+    opcoes = shift_correct_option(opcoes, p['correta'])
+    p['opcoes_embaralhadas'] = opcoes
 
 respostas_usuario = []
 score = 0
-for i, (pergunta, correta, opcoes) in enumerate(perguntas):
-    escolha = st.radio(f"{i+1}. {pergunta}", opcoes, key=f"q4_{i}")
+for i, p in enumerate(perguntas):
+    escolha = st.radio(f"{i+1}. {p['pergunta']}", p['opcoes_embaralhadas'], key=f"q4_{i}")
     respostas_usuario.append(escolha)
-    if escolha == correta:
+    if escolha == p['correta']:
         score += 1
 
 if st.button("Enviar respostas"):
@@ -118,17 +162,17 @@ if st.button("Enviar respostas"):
     st.markdown("---")
     st.subheader("Feedback detalhado:")
 
-    for i, (escolha, (_, correta, _)) in enumerate(zip(respostas_usuario, perguntas), 1):
-        if escolha == correta:
+    for i, (escolha, p) in enumerate(zip(respostas_usuario, perguntas), 1):
+        if escolha == p['correta']:
             st.markdown(f"""✅  
-{i}. Correta! {justificativas[i-1]}  
+{i}. Correta! {p['justificativa']}  
 ✔️ Muito bem!""")
         else:
             st.markdown(f"""❌  
 {i}. Incorreta. Sua resposta: {escolha}  
-Resposta correta: {correta}  
-Justificativa: {justificativas[i-1]}  
-{dicas[i-1]}""")
+Resposta correta: {p['correta']}  
+Justificativa: {p['justificativa']}  
+{p['dica']}""")
 
     st.markdown("---")
     if score == 10:
